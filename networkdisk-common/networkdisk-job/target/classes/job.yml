@@ -1,0 +1,8 @@
+spring:
+  xxl:
+    job:
+      enabled: true
+      adminAddresses: http://192.168.0.1:23333/xxl-job-admin/  #xxljob的地址，如果你要用他，这里需要改成你自己的
+      appName: xxl-job-executor  #需要和你在xxl-job上创建的执行器名字保持一致，这里需要改成你自己的
+      accessToken: default_token #需要和你在xxl-job上创建的token保持一致，这里需要改成你自己的
+

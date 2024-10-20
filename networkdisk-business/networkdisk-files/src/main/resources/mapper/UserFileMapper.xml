@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.disk.files.infrastructure.mapper.UserFileMapper">
+    <resultMap id="BaseResultMap" type="com.disk.files.domain.entity.UserFileDO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="parentId" column="parent_id" jdbcType="BIGINT"/>
+        <result property="realFileId" column="real_file_id" jdbcType="BIGINT"/>
+        <result property="filename" column="filename" jdbcType="VARCHAR"/>
+        <result property="folderFlag" column="folder_flag" jdbcType="TINYINT"/>
+        <result property="fileSizeDesc" column="file_size_desc" jdbcType="VARCHAR"/>
+        <result property="fileType" column="file_type" jdbcType="TINYINT"/>
+        <result property="id" column="ID"/>
+        <result property="gmtCreate" column="GMT_CREATE"/>
+        <result property="gmtModified" column="GMT_MODIFIED"/>
+        <result property="deleted" column="DELETED"/>
+        <result property="lockVersion" column="LOCK_VERSION"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        file_id
+        ,user_id,parent_id,
+        real_file_id,filename,folder_flag,
+        file_size_desc,file_type,del_flag,
+        create_user,gmt_create,update_user,
+        gmt_modified
+    </sql>
+
+    <!--    基本条件：根据 userId 和 delFlag 过滤文件记录。-->
+    <!--    动态条件：根据 fileIdList、parentId 和 fileTypeArray 动态添加查询条件。-->
+    <select id="listUserFiles" resultType="com.disk.files.domain.entity.UserFileDO">
+        SELECT
+        id ,
+        parent_id AS parentId,
+        filename AS filename,
+        file_size_desc AS fileSizeDesc,
+        folder_flag AS folderFlag,
+        file_type AS fileType,
+        gmt_modified AS updateTime
+        FROM
+        user_file
+        WHERE
+        user_id = #{param.userId}
+        -- 如果 param.fileIdList 不为空
+        <if test="param.fileIdList != null">
+            -- 动态地将 param.fileIdList 中的文件 ID 添加到 IN 子句中
+            AND file_id IN
+            <foreach collection="param.fileIdList" open="(" close=")" item="item" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        -- 如果 param.parentId 不为空且不等于 -1
+        <if test="param.parentId != null and param.parentId != -1">
+            -- 动态地添加 parent_id 条件
+            AND parent_id = #{param.parentId}
+        </if>
+        -- 如果 param.fileTypeArray 不为空
+        <if test="param.fileTypeArray != null">
+            -- 动态地将 param.fileTypeArray 中的文件类型添加到 IN 子句中
+            AND file_type IN
+            <foreach collection="param.fileTypeArray" open="(" close=")" item="item" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        -- 最终条件，过滤掉已删除的文件
+        AND deleted = #{param.deleted}
+    </select>
+
+    <select id="searchFile" resultType="com.disk.files.domain.entity.UserFileDO">
+        SELECT
+        file_id AS fileId,
+        parent_id AS parentId,
+        filename AS filename,
+        file_size_desc AS fileSizeDesc,
+        folder_flag AS folderFlag,
+        file_type AS fileType,
+        update_time AS updateTime
+        FROM
+        r_pan_user_file
+        WHERE
+        user_id = #{param.userId}
+        AND filename LIKE CONCAT(#{param.keyword}, '%')
+        <if test="param.fileTypeArray != null">
+            AND file_type IN
+            <foreach collection="param.fileTypeArray" open="(" close=")" item="item" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        AND del_flag = 0
+    </select>
+</mapper>

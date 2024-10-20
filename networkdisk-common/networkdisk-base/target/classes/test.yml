@@ -1,0 +1,36 @@
+spring:
+  xxl:
+    job:
+      enabled: false
+  autoconfigure:
+    exclude: org.apache.shardingsphere.spring.boot.ShardingSphereAutoConfiguration
+  data:
+    redis:
+      host: localhost
+      port: 6379 # Redis服务器连接端口
+      password: NFTurbo666 # Redis服务器连接密码（默认为空）
+  datasource:
+    url: jdbc:h2:mem:nfturbo
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+    h2-console-setting: INIT=RUNSCRIPT FROM 'classpath:schema.sql'
+
+
+# MyBatis配置
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true # 将数据库字段的下划线命名转换为驼峰命名
+  mapper-locations: classpath:mapper/*.xml # MyBatis映射文件所在的位置，这里是使用XML的配置方式时需要配置的部分
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印sql日志
+
+dubbo:
+  application:
+    name: nft-turbo-business
+  registry:
+    address: nacos://127.0.0.1:8848  # 这是跑单元测试的时候需要用到nacos地址，可以改成你自己的，也可以把对应的服务mock调，使用@MockBean注解即可
+  consumer:
+    check: false

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.disk.user.infrastructure.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.disk.user.domain.entity.UserDO">
+        <result property="id" column="ID"/>
+        <result property="gmtCreate" column="GMT_CREATE"/>
+        <result property="gmtModified" column="GMT_MODIFIED"/>
+        <result property="nickName" column="NICK_NAME"/>
+        <result property="passwordHash" column="PASSWORD_HASH"/>
+        <result property="state" column="STATE"/>
+        <result property="inviteCode" column="INVITE_CODE"/>
+        <result property="telephone" column="TELEPHONE"/>
+        <result property="inviterId" column="INVITER_ID"/>
+        <result property="lastLoginTime" column="LAST_LOGIN_TIME"/>
+        <result property="profilePhotoUrl" column="PROFILE_PHOTO_URL"/>
+        <result property="certification" column="CERTIFICATION"/>
+        <result property="realName" column="REAL_NAME" typeHandler="com.disk.user.infrastructure.mapper.AesEncryptTypeHandler"/>
+        <result property="idCardNo" column="ID_CARD_NO" typeHandler="com.disk.user.infrastructure.mapper.AesEncryptTypeHandler"/>
+        <result property="userRole" column="USER_ROLE"/>
+        <result property="deleted" column="DELETED"/>
+        <result property="lockVersion" column="LOCK_VERSION"/>
+    </resultMap>
+
+
+    <select id="findById" resultMap="BaseResultMap">select * from user where deleted=0
+        <if test="id!=null">AND id = #{id}</if>
+    </select>
+
+    <select id="findByNickname" resultMap="BaseResultMap">select * from user where deleted=0
+        <if test="nickName!=null">AND nick_name = #{nickName}</if>
+    </select>
+
+    <select id="findByInviteCode" resultMap="BaseResultMap">select * from user where deleted=0
+        <if test="inviteCode!=null">AND invite_code = #{inviteCode}</if>
+    </select>
+
+    <select id="findByTelephone" resultMap="BaseResultMap">select * from user where deleted=0
+        <if test="telephone!=null">AND telephone = #{telephone}</if>
+    </select>
+
+    <select id="findByTelephoneAndPass" resultMap="BaseResultMap">select * from user where deleted=0
+        <if test="telephone!=null">AND telephone = #{telephone}</if>
+        <if test="passwordHash!=null">AND password_hash = #{passwordHash}</if>
+    </select>
+</mapper>

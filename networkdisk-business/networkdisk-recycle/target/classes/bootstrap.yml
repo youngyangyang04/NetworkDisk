@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: networkdisk-user
+  config:
+    import: classpath:config.yml

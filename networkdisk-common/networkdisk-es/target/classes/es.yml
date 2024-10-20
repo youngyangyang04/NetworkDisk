@@ -1,0 +1,11 @@
+spring:
+  elasticsearch:
+    enable: true
+    uris: http://192.168.0.1:9200 #如果你没有启动一键mock，这里需要改成你自己的
+    username: elastic #如果你没有启动一键mock，这里需要改成你自己的
+    password: 123456 #如果你没有启动一键mock，这里需要改成你自己的
+easy-es:
+  enable: true
+  address : 192.168.0.1:9200 #如果你没有启动一键mock，这里需要改成你自己的
+  username: elastic #如果你没有启动一键mock，这里需要改成你自己的
+  password: 123456 #如果你没有启动一键mock，这里需要改成你自己的

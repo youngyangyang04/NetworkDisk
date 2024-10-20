@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.disk</groupId>
+        <artifactId>networkdisk-business</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.disk</groupId>
+    <artifactId>networkdisk-app</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>networkdisk-app</name>
+    <description>networkdisk-app</description>
+
+    <properties>
+        <application.name>nfturbo-business</application.name>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-share</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-files</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-user</artifactId>
+        </dependency>
+
+        <!--    shardingsphere和2.2不兼容，需要使用1.33，但是1.33和springboot 3.2.2 不兼容，所以自定义了 TagInspector和 UnTrustedTagInspector  -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.33</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

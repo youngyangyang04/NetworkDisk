@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    sentinel:
+      transport:
+        dashboard: 192.168.0.1:8099 #如果用了sentinel 这里需要改成你自己的sentinel的控制台地址
+        port: 8098 # 如果用了sentinel 这里需要改成你自己的
+      datasource:
+        ds:
+          nacos:
+            server-addr: 192.168.0.1:8848 #如果用了sentinel 这里需要改成你自己的nacos的控制台地址
+            data-id: nfturbo-gateway-sentinel  # 如果用了sentinel 这里需要改成你自己的 在nacos上定义的data-id
+            group-id: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow  # 也可以是 degrade, param-flow, etc.

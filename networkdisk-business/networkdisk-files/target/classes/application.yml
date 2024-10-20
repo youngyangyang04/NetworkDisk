@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: networkdisk-files
+  config:
+    import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml
+server:
+  port: 8081
+
+#dubbo:
+#  protocol:
+#    port: 20889
+#  application:
+#    qos-port: 33333
