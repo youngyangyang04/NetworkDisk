@@ -1,5 +1,6 @@
 package com.disk.web.vo;
 
+import com.disk.base.exception.ErrorCode;
 import com.disk.base.response.SingleResponse;
 import lombok.Getter;
 import lombok.Setter;
@@ -71,5 +72,9 @@ public class Result<T> {
 
     public static <T> Result<T> error(String errorCode,String errorMsg) {
         return new Result<>(false, errorCode, errorMsg, null);
+    }
+
+    public static <T> Result<T> error(ErrorCode errorCode) {
+        return new Result<>(false, errorCode.getCode(), errorCode.getMessage(), null);
     }
 }

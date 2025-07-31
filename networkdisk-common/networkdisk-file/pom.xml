@@ -64,7 +64,7 @@
         <dependency>
             <groupId>com.github.tobato</groupId>
             <artifactId>fastdfs-client</artifactId>
-            <version>1.26.1-RELEASE</version>
+            <version>1.27.2</version>
         </dependency>
 
         <!--json序列化-->

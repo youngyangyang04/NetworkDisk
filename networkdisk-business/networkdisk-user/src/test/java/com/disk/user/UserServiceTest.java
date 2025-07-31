@@ -19,7 +19,6 @@ public class UserServiceTest extends UserBaseTest{
     @Test
     public void testAddUser() {
         UserDO user = new UserDO();
-        user.register("123232432", "nickName", "password", "inviteCode", "inviterId");
         userService.save(user);
     }
 }

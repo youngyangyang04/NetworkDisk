@@ -16,7 +16,7 @@
     <description>networkdisk-auth</description>
 
     <properties>
-        <application.name>nfturbo-auth</application.name>
+        <application.name>networkdisk-auth</application.name>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

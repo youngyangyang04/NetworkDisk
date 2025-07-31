@@ -18,7 +18,7 @@ CREATE TABLE `file`
     `gmt_modified`              datetime                                               NOT NULL COMMENT '最后更新时间',
     `deleted`                   int                                                             DEFAULT NULL COMMENT '是否逻辑删除，0为未删除，非0为已删除',
     `lock_version`              int                                                             DEFAULT NULL COMMENT '乐观锁版本号',
-    PRIMARY KEY (`file_id`) USING BTREE
+    PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_bin
@@ -33,7 +33,7 @@ CREATE TABLE `share`
     `id`             bigint(0) NOT NULL COMMENT '分享id',
     `share_name`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享名称',
     `share_type`     tinyint(1) NOT NULL DEFAULT 0 COMMENT '分享类型（0 有提取码）',
-    `share_day_type` tinyint(1) NOT NULL DEFAULT 0 COMMENT '分享类型（0 永久有效；1 7天有效；2 30天有效）',
+    `share_day_type` tinyint(1) NOT NULL DEFAULT 0 COMMENT '分享天数类型（0 永久有效；1 7天有效；2 30天有效）',
     `share_day`      tinyint(1) NOT NULL DEFAULT 0 COMMENT '分享有效天数（永久有效为0）',
     `share_end_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP (0) COMMENT '分享结束时间',
     `share_url`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享链接地址',
@@ -44,7 +44,7 @@ CREATE TABLE `share`
     `gmt_modified`   datetime                                               NOT NULL COMMENT '最后更新时间',
     `deleted`        int                                                             DEFAULT NULL COMMENT '是否逻辑删除，0为未删除，非0为已删除',
     `lock_version`   int                                                             DEFAULT NULL COMMENT '乐观锁版本号',
-    PRIMARY KEY (`share_id`) USING BTREE,
+    PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `uk_create_user_time` (`create_user`, `gmt_create`) USING BTREE COMMENT '创建人、创建时间唯一索引'
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4

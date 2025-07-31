@@ -36,6 +36,7 @@
         <module>networkdisk-rpc</module>
         <module>networkdisk-sa-token</module>
         <module>networkdisk-web</module>
+        <module>networkdisk-delay-message</module>
     </modules>
 
     <dependencies>

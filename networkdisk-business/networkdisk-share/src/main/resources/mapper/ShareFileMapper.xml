@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.disk.share.infrastructure.mapper.ShareFileMapper">
+
+    <resultMap id="BaseResultMap" type="com.disk.share.domain.entity.ShareFileDO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="shareId" column="share_id" jdbcType="BIGINT"/>
+        <result property="fileId" column="fileId" jdbcType="BIGINT"/>
+        <result property="createUser" column="create_user" jdbcType="BIGINT"/>
+        <result property="gmtCreate" column="GMT_CREATE"/>
+        <result property="gmtModified" column="GMT_MODIFIED"/>
+        <result property="deleted" column="DELETED"/>
+        <result property="lockVersion" column="LOCK_VERSION"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, share_id, file_id, create_user, gmt_create, gmt_modified, deleted, lock_version
+    </sql>
+</mapper>

@@ -38,4 +38,7 @@ public class QueryFileContext {
      * 文件ID集合
      */
     private List<Long> fileIdList;
+
+
+    private Integer fileFolderType;
 }

@@ -9,6 +9,7 @@ import com.disk.file.context.StoreFileChunkContext;
 import com.disk.file.context.StoreFileContext;
 import com.disk.file.core.AbstractStorageEngine;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -22,6 +23,7 @@ import java.util.List;
  *
  * @author weikunkun
  */
+@Primary
 @Component
 public class LocalStorageEngine extends AbstractStorageEngine {
 

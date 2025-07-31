@@ -2,6 +2,7 @@ package com.disk.file.core;
 
 import cn.hutool.core.lang.Assert;
 import com.disk.base.exception.SystemException;
+import com.disk.base.utils.EmptyUtil;
 import com.disk.cache.constant.CacheConstant;
 import com.disk.file.context.DeleteFileContext;
 import com.disk.file.context.MergeFileContext;
@@ -27,7 +28,7 @@ public abstract class AbstractStorageEngine implements StorageEngine {
     private CacheManager cacheManager;
 
     protected Cache getCache() {
-        if (Objects.isNull(cacheManager)) {
+        if (EmptyUtil.isEmpty(cacheManager)) {
             throw new SystemException("具体的缓存实现需要引用到项目中");
         }
         return cacheManager.getCache(CacheConstant.CACHE_COMMON_NAME);

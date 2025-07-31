@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -40,5 +41,15 @@ public class WebConfiguration implements WebMvcConfigurer {
         registrationBean.setOrder(10);
 
         return registrationBean;
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:*")  // 允许的跨域来源
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")  // 允许的方法
+                .allowedHeaders("*")  // 允许的请求头
+                .allowCredentials(true);
+//                .maxAge(3600);  // 预检请求的有效期
     }
 }

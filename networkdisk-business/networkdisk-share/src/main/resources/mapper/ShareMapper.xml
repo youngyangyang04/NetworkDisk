@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.disk.share.infrastructure.mapper.ShareMapper">
+
+    <resultMap id="BaseResultMap" type="com.disk.share.domain.entity.ShareDO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="shareName" column="share_name" jdbcType="VARCHAR"/>
+        <result property="shareType" column="share_type" jdbcType="INTEGER"/>
+        <result property="shareDayType" column="share_day_type" jdbcType="INTEGER"/>
+        <result property="shareDay" column="share_day" jdbcType="INTEGER"/>
+        <result property="shareUrl" column="share_url" jdbcType="VARCHAR"/>
+        <result property="shareCode" column="share_code" jdbcType="VARCHAR"/>
+        <result property="shareStatus" column="share_status" jdbcType="INTEGER"/>
+        <result property="createUser" column="create_user" jdbcType="BIGINT"/>
+        <result property="shareEndTime" column="share_end_time"/>
+        <result property="gmtCreate" column="GMT_CREATE"/>
+        <result property="gmtModified" column="GMT_MODIFIED"/>
+        <result property="deleted" column="DELETED"/>
+        <result property="lockVersion" column="LOCK_VERSION"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, share_name, share_type, share_day_type, share_day, share_end_time, share_url, share_code, share_status, create_user
+    </sql>
+</mapper>

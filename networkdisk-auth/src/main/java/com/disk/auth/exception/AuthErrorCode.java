@@ -32,7 +32,12 @@ public enum AuthErrorCode implements ErrorCode {
     /**
      * 用户不存在
      */
-    USER_NOT_EXIST("USER_NOT_EXIST", "用户不存在");
+    USER_NOT_EXIST("USER_NOT_EXIST", "用户不存在"),
+
+    /**
+     * 用户注册
+     */
+    USER_REGISTER_FAIL("USER_REGISTER_FAIL", "注册失败"),
     ;
 
     private final String code;

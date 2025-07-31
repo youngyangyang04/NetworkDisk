@@ -12,7 +12,7 @@ public enum UserErrorCode implements ErrorCode {
     /**
      * 重复电话号码
      */
-    DUPLICATE_TELEPHONE_NUMBER("DUPLICATE_TELEPHONE_NUMBER", "重复电话号码"),
+    DUPLICATE_TELEPHONE_NUMBER("DUPLICATE_TELEPHONE_NUMBER", "重复邮箱"),
     /**
      * 用户状态不能进行实名认证
      */
@@ -57,7 +57,12 @@ public enum UserErrorCode implements ErrorCode {
     /**
      * 用户上传图片失败
      */
-    USER_UPLOAD_PICTURE_FAIL("USER_UPLOAD_PICTURE_FAIL", "用户上传图片失败");
+    USER_UPLOAD_PICTURE_FAIL("USER_UPLOAD_PICTURE_FAIL", "用户上传图片失败"),
+    /**
+     * 用户信息获取失败
+     */
+    USER_INFO_FAIL("USER_INFO_FAIL", "获取用户信息失败"),
+    ;
 
     private String code;
 

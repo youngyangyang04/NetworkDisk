@@ -73,15 +73,13 @@ public class GlobalWebExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public Result handleValidationExceptions(MethodArgumentNotValidException ex) {
         log.error("MethodArgumentNotValidException occurred.", ex);
-        Map<String, String> errors = Maps.newHashMapWithExpectedSize(1);
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
+        Result result = new Result();
+        result.setCode(ILLEGAL_ARGUMENT.name());
+        result.setMessage(ex.getMessage());
+        result.setSuccess(false);
+        return result;
     }
 
     /**
@@ -123,21 +121,21 @@ public class GlobalWebExceptionHandler {
         return result;
     }
 
-    /**
-     * 自定义系统异常处理器
-     *
-     * @param throwable
-     * @return
-     */
-    @ExceptionHandler(Throwable.class)
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public Result throwableHandler(Throwable throwable) {
-        log.error("throwable occurred.",throwable);
-        Result result = new Result();
-        result.setCode(SYSTEM_ERROR.name());
-        result.setMessage("哎呀，当前网络比较拥挤，请您稍后再试~");
-        result.setSuccess(false);
-        return result;
-    }
+//    /**
+//     * 自定义系统异常处理器
+//     *
+//     * @param throwable
+//     * @return
+//     */
+//    @ExceptionHandler(Throwable.class)
+//    @ResponseStatus(HttpStatus.OK)
+//    @ResponseBody
+//    public Result throwableHandler(Throwable throwable) {
+//        log.error("throwable occurred.",throwable);
+//        Result result = new Result();
+//        result.setCode(SYSTEM_ERROR.name());
+//        result.setMessage("哎呀，当前网络比较拥挤，请您稍后再试~");
+//        result.setSuccess(false);
+//        return result;
+//    }
 }

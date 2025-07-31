@@ -2,10 +2,12 @@ package com.disk.files.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.disk.data.domain.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.util.Date;
 
 /**
@@ -15,13 +17,10 @@ import java.util.Date;
  */
 @Setter
 @Getter
+@TableName(value ="file")
 public class FileDO extends BaseEntity {
 
-    /**
-     * 文件id
-     */
-    @TableId(value = "id")
-    private Long id;
+    private static final long serialVersionUID = 151230768074641736L;
 
     /**
      * 文件名称

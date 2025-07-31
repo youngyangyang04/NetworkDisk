@@ -11,32 +11,54 @@ import java.util.Map;
  */
 public class EmptyUtil {
 
-    private EmptyUtil() {
-        throw new UnsupportedOperationException("cannot be instantiated");
+    /**
+     * 判断字符串是否为空，空串被视为空
+     *
+     * @param str
+     * @return null或空串返回true
+     */
+    public static boolean isEmpty(String str) {
+        return null == str || "".equals(str);
+    }
+
+    /**
+     * 判断列表是否为空
+     *
+     * @param collection
+     * @return null或空列表返回true
+     */
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.size() == 0;
+    }
+
+    /**
+     * 判断数组对象是否为空
+     *
+     * @param array
+     * @return
+     */
+    public static boolean isEmpty(Object[] array) {
+        return array == null || array.length == 0;
     }
 
     /**
      * 判断对象是否为空
      *
-     * @param obj 对象
-     * @return {@code true}: 为空<br>{@code false}: 不为空
+     * @param obj
+     * @return
      */
     public static boolean isEmpty(Object obj) {
-        if (obj == null) {
-            return true;
-        }
-        if (obj instanceof CharSequence && obj.toString().length() == 0) {
-            return true;
-        }
-        if (obj.getClass().isArray() && Array.getLength(obj) == 0) {
-            return true;
-        }
-        if (obj instanceof Collection && ((Collection) obj).isEmpty()) {
-            return true;
-        }
-        if (obj instanceof Map && ((Map) obj).isEmpty()) {
-            return true;
-        }
-        return false;
+        return null == obj || "".equals(obj);
     }
+
+    /**
+     * 判断Map是否为空
+     *
+     * @param obj
+     * @return
+     */
+    public static boolean isEmpty(Map<?, ?> obj) {
+        return obj == null || obj.isEmpty();
+    }
+
 }

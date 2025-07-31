@@ -1,6 +1,7 @@
 package com.disk.files.domain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.disk.files.domain.context.FileChunkMergeAndSaveContext;
 import com.disk.files.domain.context.ListFileContext;
 import com.disk.files.domain.context.SaveFileContext;
 import com.disk.files.domain.entity.FileDO;
@@ -29,4 +30,5 @@ public interface FileService extends IService<FileDO> {
      */
     void saveFile(SaveFileContext context);
 
+    void mergeFileChunkAndSaveFile(FileChunkMergeAndSaveContext fileChunkMergeAndSaveContext);
 }

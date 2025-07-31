@@ -29,7 +29,7 @@ public class UserIdUtil {
      */
     public static Long get() {
         Long userId = threadLocal.get();
-        if (Objects.isNull(userId)) {
+        if (EmptyUtil.isEmpty(userId)) {
             return BaseConstant.ZERO_LONG;
         }
         return userId;

@@ -31,7 +31,7 @@ public interface UserFacadeService {
      * @param request
      * @return
      */
-    UserOperatorResponse register(UserRegisterRequest request);
+    UserOperatorResponse<UserInfo> register(UserRegisterRequest request);
 
     /**
      * 用户修改

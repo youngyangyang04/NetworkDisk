@@ -1,8 +1,7 @@
 package com.disk.files.domain.response;
 
-import com.disk.base.request.BaseRequest;
 import com.disk.files.infrastructure.serializer.Date2StringSerializer;
-import com.disk.files.infrastructure.serializer.IdEncryptSerializer;
+import com.disk.web.serializer.IdEncryptSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.Setter;

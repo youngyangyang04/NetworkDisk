@@ -2,14 +2,13 @@ package com.disk.files.infrastructure.serializer;
 
 import cn.hutool.core.date.DateUtil;
 import com.disk.base.constant.BaseConstant;
+import com.disk.base.utils.EmptyUtil;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * 类描述: Date 转 String 的 JSON 序列化器
@@ -21,7 +20,7 @@ import java.util.Objects;
 public class Date2StringSerializer extends JsonSerializer<Date> {
     @Override
     public void serialize(Date date, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        if (Objects.isNull(date)) {
+        if (EmptyUtil.isEmpty(date)) {
             // 如果 date 为 null，则使用 StringUtils.EMPTY 写一个空字符串。
             jsonGenerator.writeString(BaseConstant.EMPTY_STR);
         } else {

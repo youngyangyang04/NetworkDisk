@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: @application.name@
+  config:
+    import: classpath:config.yml #这里爆红可以直接忽略，没有任何影响

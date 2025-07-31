@@ -3,8 +3,10 @@ package com.disk.user.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import com.disk.api.user.request.UserQueryRequest;
 import com.disk.api.user.response.data.UserInfo;
+import com.disk.base.utils.UserIdUtil;
 import com.disk.user.domain.entity.UserDO;
 import com.disk.user.domain.entity.convertor.UserConvertor;
+import com.disk.user.domain.response.UserInfoVO;
 import com.disk.user.domain.service.UserService;
 import com.disk.user.infrastructure.exception.UserException;
 import com.disk.web.vo.Result;
@@ -27,7 +29,7 @@ import static com.disk.user.infrastructure.exception.UserErrorCode.USER_NOT_EXIS
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     @Autowired
@@ -37,21 +39,15 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/get-user-info")
-    public Result<UserInfo>  getUserInfo() {
-        String userId = (String) StpUtil.getLoginId();
-        UserQueryRequest userQueryRequest = new UserQueryRequest();
-//        userQueryRequest.setUserId(Long.valueOf(userId));
-        UserDO user = userService.findById(Long.valueOf(userId));
-
-        if (null == user) {
-            throw new UserException(USER_NOT_EXIST);
-        }
-        return Result.success(UserConvertor.INSTANCE.mapToVo(user));
+    public Result<UserInfoVO> getUserInfo() {
+        Long userId = UserIdUtil.get();
+        UserInfoVO userInfo = userService.getUserInfo(userId);
+        return Result.success(userInfo);
 
     }
 
     @GetMapping("/test/{id}")
-    public Result<UserDO>  test(@PathVariable Long id) {
+    public Result<UserDO> test(@PathVariable Long id) {
         UserDO userDO = userService.findById(Long.valueOf(id));
         return Result.success(userDO);
     }

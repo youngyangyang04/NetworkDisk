@@ -4,20 +4,15 @@
 <mapper namespace="com.disk.user.infrastructure.mapper.UserMapper">
     <resultMap id="BaseResultMap" type="com.disk.user.domain.entity.UserDO">
         <result property="id" column="ID"/>
+        <result property="useSpace" column="USE_SPACE"/>
+        <result property="totalSpace" column="TOTAL_SPACE"/>
+        <result property="email" column="EMAIL"/>
         <result property="gmtCreate" column="GMT_CREATE"/>
         <result property="gmtModified" column="GMT_MODIFIED"/>
         <result property="nickName" column="NICK_NAME"/>
         <result property="passwordHash" column="PASSWORD_HASH"/>
-        <result property="state" column="STATE"/>
-        <result property="inviteCode" column="INVITE_CODE"/>
-        <result property="telephone" column="TELEPHONE"/>
-        <result property="inviterId" column="INVITER_ID"/>
         <result property="lastLoginTime" column="LAST_LOGIN_TIME"/>
         <result property="profilePhotoUrl" column="PROFILE_PHOTO_URL"/>
-        <result property="certification" column="CERTIFICATION"/>
-        <result property="realName" column="REAL_NAME" typeHandler="com.disk.user.infrastructure.mapper.AesEncryptTypeHandler"/>
-        <result property="idCardNo" column="ID_CARD_NO" typeHandler="com.disk.user.infrastructure.mapper.AesEncryptTypeHandler"/>
-        <result property="userRole" column="USER_ROLE"/>
         <result property="deleted" column="DELETED"/>
         <result property="lockVersion" column="LOCK_VERSION"/>
     </resultMap>
@@ -35,8 +30,8 @@
         <if test="inviteCode!=null">AND invite_code = #{inviteCode}</if>
     </select>
 
-    <select id="findByTelephone" resultMap="BaseResultMap">select * from user where deleted=0
-        <if test="telephone!=null">AND telephone = #{telephone}</if>
+    <select id="findByEmail" resultMap="BaseResultMap">select * from user where deleted=0
+        <if test="email!=null">AND email = #{email}</if>
     </select>
 
     <select id="findByTelephoneAndPass" resultMap="BaseResultMap">select * from user where deleted=0

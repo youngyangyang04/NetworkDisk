@@ -60,11 +60,6 @@
 
         <dependency>
             <groupId>com.disk</groupId>
-            <artifactId>networkdisk-es</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.disk</groupId>
             <artifactId>networkdisk-config</artifactId>
         </dependency>
 

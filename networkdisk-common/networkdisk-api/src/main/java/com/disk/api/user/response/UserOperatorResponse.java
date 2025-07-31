@@ -11,6 +11,10 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class UserOperatorResponse extends BaseResponse {
+public class UserOperatorResponse<T> extends BaseResponse {
+
+    private static final long serialVersionUID = -1134821954496052435L;
+
+    private T data;
 
 }

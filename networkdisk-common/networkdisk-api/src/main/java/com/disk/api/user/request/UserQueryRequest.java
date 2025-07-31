@@ -1,8 +1,7 @@
 package com.disk.api.user.request;
 
+import com.disk.api.user.request.condition.UserEmailQueryCondition;
 import com.disk.api.user.request.condition.UserIdQueryCondition;
-import com.disk.api.user.request.condition.UserPhoneAndPasswordQueryCondition;
-import com.disk.api.user.request.condition.UserPhoneQueryCondition;
 import com.disk.api.user.request.condition.UserQueryCondition;
 import com.disk.base.request.BaseRequest;
 import lombok.AllArgsConstructor;
@@ -29,17 +28,10 @@ public class UserQueryRequest extends BaseRequest {
         this.userQueryCondition = userIdQueryCondition;
     }
 
-    public UserQueryRequest(String telephone) {
-        UserPhoneQueryCondition userPhoneQueryCondition = new UserPhoneQueryCondition();
-        userPhoneQueryCondition.setTelephone(telephone);
+    public UserQueryRequest(String email) {
+        UserEmailQueryCondition userPhoneQueryCondition = new UserEmailQueryCondition();
+        userPhoneQueryCondition.setEmail(email);
         this.userQueryCondition = userPhoneQueryCondition;
-    }
-
-    public UserQueryRequest(String telephone, String password) {
-        UserPhoneAndPasswordQueryCondition userPhoneAndPasswordQueryCondition = new UserPhoneAndPasswordQueryCondition();
-        userPhoneAndPasswordQueryCondition.setTelephone(telephone);
-        userPhoneAndPasswordQueryCondition.setPassword(password);
-        this.userQueryCondition = userPhoneAndPasswordQueryCondition;
     }
 
 }

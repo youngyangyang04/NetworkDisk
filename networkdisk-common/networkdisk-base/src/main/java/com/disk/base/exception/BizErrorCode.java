@@ -9,6 +9,11 @@ package com.disk.base.exception;
 public enum BizErrorCode implements ErrorCode {
 
     /**
+     * 未登录
+     */
+    NOT_LOGIN_ERROR("NOT_LOGIN", "未登录"),
+
+    /**
      * HTTP 客户端错误
      */
     HTTP_CLIENT_ERROR("HTTP_CLIENT_ERROR", "HTTP 客户端错误"),

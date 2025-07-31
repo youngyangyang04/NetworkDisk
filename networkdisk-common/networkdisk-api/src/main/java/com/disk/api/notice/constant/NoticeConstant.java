@@ -7,6 +7,6 @@ package com.disk.api.notice.constant;
  */
 public class NoticeConstant {
 
-    public static final String CAPTCHA_KEY_PREFIX = "nft:turbo:captcha:";
+    public static final String CAPTCHA_KEY_PREFIX = "network-disk:captcha:";
 
 }

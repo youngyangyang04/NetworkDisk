@@ -62,7 +62,7 @@ public class FileUtil {
      * @return
      */
     public static String byteCountToDisplaySize(Long totalSize) {
-        if (Objects.isNull(totalSize)) {
+        if (EmptyUtil.isEmpty(totalSize)) {
             return BaseConstant.EMPTY_STR;
         }
         return FileUtils.byteCountToDisplaySize(totalSize);
@@ -142,14 +142,14 @@ public class FileUtil {
     /**
      * 生成默认的文件存储路径
      * <p>
-     * 生成规则：当前登录用户的文件目录 + rpan
+     * 生成规则：当前登录用户的文件目录 + coder-pan
      *
      * @return
      */
     public static String generateDefaultStoreFileRealPath() {
         return new StringBuffer(System.getProperty("user.home"))
                 .append(File.separator)
-                .append("rpan")
+                .append("coder-pan")
                 .toString();
     }
 
@@ -161,7 +161,7 @@ public class FileUtil {
     public static String generateDefaultStoreFileChunkRealPath() {
         return new StringBuffer(System.getProperty("user.home"))
                 .append(File.separator)
-                .append("rpan")
+                .append("coder-pan")
                 .append(File.separator)
                 .append("chunks")
                 .toString();

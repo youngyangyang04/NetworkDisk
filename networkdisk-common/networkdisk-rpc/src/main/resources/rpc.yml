@@ -5,10 +5,11 @@ dubbo:
   protocol:
     name: dubbo
     port: -1
+
   registry:
     address: nacos://127.0.0.1:8848 #首次启动前务必修改成你自己的
     parameters:
-      namespace: 3d600de3-6220-4ea1-ac0e-62dea85fa0fa # 自己到nacos上创建一个给dubbo用的namespce，然后和这里保持一致，首次启动前务必修改成个人的
+      namespace: 9b074f47-91e3-4968-9e3c-fb908353ba61      # 自己到nacos上创建一个给dubbo用的namespce，然后和这里保持一致，首次启动前务必修改成个人的
       group: dubbo #首次启动前务必修改为个人的
   application:
     name: ${spring.application.name}

@@ -10,8 +10,8 @@ import com.disk.file.context.ReadFileContext;
 import com.disk.file.context.StoreFileChunkContext;
 import com.disk.file.context.StoreFileContext;
 import com.disk.file.core.AbstractStorageEngine;
-import com.github.tobato.fastdfs.domain.StorePath;
-import com.github.tobato.fastdfs.proto.storage.DownloadByteArray;
+import com.github.tobato.fastdfs.domain.fdfs.StorePath;
+import com.github.tobato.fastdfs.domain.proto.storage.DownloadByteArray;
 import com.github.tobato.fastdfs.service.FastFileStorageClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ import java.util.List;
 public class FastDFSStorageEngine extends AbstractStorageEngine {
 
     @Autowired
-    private FastFileStorageClient client;
+    private FastFileStorageClient fastFileStorageClient;
 
     @Autowired
     private FastDFSStorageEngineConfig config;
@@ -38,14 +38,14 @@ public class FastDFSStorageEngine extends AbstractStorageEngine {
 
     @Override
     protected void doStore(StoreFileContext context) throws IOException {
-        StorePath storePath = client.uploadFile(config.getGroup(), context.getInputStream(), context.getTotalSize(), FileUtil.getFileExtName(context.getFilename()));
+        StorePath storePath = fastFileStorageClient.uploadFile(config.getGroup(), context.getInputStream(), context.getTotalSize(), FileUtil.getFileExtName(context.getFilename()));
         context.setRealPath(storePath.getFullPath());    }
 
     @Override
     protected void doDelete(DeleteFileContext context) throws IOException {
         List<String> realFilePathList = context.getRealFilePathList();
         if (CollectionUtils.isNotEmpty(realFilePathList)) {
-            realFilePathList.forEach(client::deleteFile);
+            realFilePathList.forEach(fastFileStorageClient::deleteFile);
         }
     }
 
@@ -67,7 +67,7 @@ public class FastDFSStorageEngine extends AbstractStorageEngine {
 
         try (OutputStream outputStream = context.getOutputStream()) {
             DownloadByteArray downloadByteArray = new DownloadByteArray();
-            byte[] bytes = client.downloadFile(group, path, downloadByteArray);
+            byte[] bytes = fastFileStorageClient.downloadFile(group, path, downloadByteArray);
             outputStream.write(bytes);
             outputStream.flush();
         }

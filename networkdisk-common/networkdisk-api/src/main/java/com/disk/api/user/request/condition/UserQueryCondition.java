@@ -5,5 +5,7 @@ import java.io.Serializable;
 /**
  * @author Hollis
  */
+
 public interface UserQueryCondition extends Serializable {
+
 }

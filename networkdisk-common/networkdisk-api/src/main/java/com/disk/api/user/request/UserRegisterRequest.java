@@ -17,7 +17,10 @@ import lombok.ToString;
 @NoArgsConstructor
 public class UserRegisterRequest extends BaseRequest {
 
-    private String telephone;
+    private String email;
 
-    private String inviteCode;
+    private String password;
+
+    private String nickname;
+
 }

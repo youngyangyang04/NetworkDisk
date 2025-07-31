@@ -1,19 +1,12 @@
 package com.disk.file.config;
 
-import com.disk.base.exception.SystemException;
-import com.github.tobato.fastdfs.conn.ConnectionPoolConfig;
-import com.github.tobato.fastdfs.conn.FdfsConnectionPool;
-import com.github.tobato.fastdfs.conn.PooledConnectionFactory;
-import com.github.tobato.fastdfs.conn.TrackerConnectionManager;
 import com.google.common.collect.Lists;
 import lombok.Data;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.jmx.support.RegistrationPolicy;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -22,11 +15,11 @@ import java.util.List;
  *
  * @author weikunkun
  */
-@SpringBootConfiguration
 @Data
+@Component
 @ConfigurationProperties(prefix = "com.disk.file.storage.engine.fdfs")
-@EnableMBeanExport(registration = RegistrationPolicy.IGNORE_EXISTING)
 @ComponentScan(value = {"com.github.tobato.fastdfs.service", "com.github.tobato.fastdfs.domain"})
+@EnableMBeanExport(registration = RegistrationPolicy.IGNORE_EXISTING)
 public class FastDFSStorageEngineConfig {
 
     /**
@@ -44,31 +37,9 @@ public class FastDFSStorageEngineConfig {
      */
     private String group = "group1";
 
-    @Bean
-    public PooledConnectionFactory pooledConnectionFactory() {
-        PooledConnectionFactory factory = new PooledConnectionFactory();
-        factory.setConnectTimeout(getConnectTimeout());
-        return factory;
-    }
 
-    @Bean
-    public ConnectionPoolConfig connectionPoolConfig() {
-        return new ConnectionPoolConfig();
-    }
-
-    @Bean
-    public FdfsConnectionPool fdfsConnectionPool(ConnectionPoolConfig connectionPoolConfig, PooledConnectionFactory factory) {
-        FdfsConnectionPool fdfsConnectionPool = new FdfsConnectionPool(factory, connectionPoolConfig);
-        return fdfsConnectionPool;
-    }
-
-    @Bean
-    public TrackerConnectionManager trackerConnectionManager(FdfsConnectionPool fdfsConnectionPool) {
-        TrackerConnectionManager manager = new TrackerConnectionManager(fdfsConnectionPool);
-        if (CollectionUtils.isEmpty(getTrackerList())) {
-            throw new SystemException("the tracker list is empty!");
-        }
-        manager.setTrackerList(getTrackerList());
-        return manager;
-    }
+    /**
+     * fastdfs对外域名
+     */
+    private String outUrl;
 }

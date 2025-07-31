@@ -3,8 +3,12 @@ spring:
     name: @application.name@
   config:
     import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml
+  servlet:
+    multipart:
+      max-file-size: 4096MB
+      max-request-size: 4096MB
 server:
-  port: 8081
+  port: 8082
 
 
 #dubbo:
@@ -12,3 +16,34 @@ server:
 #    port: 20889
 #  application:
 #    qos-port: 33333
+
+
+# fast dfs config
+com:
+  disk:
+    file:
+      storage:
+        engine:
+          fdfs:
+            outUrl: 192.168.1.29
+          oss:
+            bucket-name: bucket
+            endpoint: oss-cn-beijing.aliyuncs.com
+            access-key-id: xxx
+            access-key-secret: xxx
+            auto-create-bucket: true
+fdfs:
+  so-timeout: 1500     #socket连接超时时长
+  connect-timeout: 600 #连接tracker服务器超时时长
+  thumb-image: #缩略图生成参数，可选
+    height: 150
+    width: 150
+  tracker-list: #TrackerList参数,支持多个,如果有多个在下方加-
+    - 192.168.1.29:22122
+
+# oss配置
+
+
+dubbo:
+  registry:
+    port:

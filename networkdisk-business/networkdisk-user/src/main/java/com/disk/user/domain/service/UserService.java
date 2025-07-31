@@ -1,24 +1,27 @@
 package com.disk.user.domain.service;
 
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.digest.DigestUtil;
-import com.alicp.jetcache.Cache;
 import com.alicp.jetcache.anno.CacheRefresh;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.disk.api.user.constant.UserOperateTypeEnum;
-import com.disk.api.user.request.UserQueryRequest;
+import com.disk.api.files.request.UserFileQueryRequest;
+import com.disk.api.files.response.UserFileQueryResponse;
+import com.disk.api.files.response.data.UserFileData;
+import com.disk.api.files.service.UserFileFacadeService;
 import com.disk.api.user.request.UserRegisterRequest;
-import com.disk.api.user.response.UserOperatorResponse;
-import com.disk.base.exception.BizException;
-import com.disk.base.exception.RepoErrorCode;
+import com.disk.api.user.service.UserFacadeService;
+import com.disk.base.enums.DeleteEnum;
+import com.disk.base.utils.EmptyUtil;
+import com.disk.base.utils.IdUtil;
+import com.disk.base.utils.PasswordUtil;
+import com.disk.user.controller.UserController;
 import com.disk.user.domain.entity.UserDO;
-import com.disk.user.infrastructure.exception.UserErrorCode;
+import com.disk.user.domain.entity.convertor.UserConvertor;
+import com.disk.user.domain.response.UserInfoVO;
 import com.disk.user.infrastructure.exception.UserException;
 import com.disk.user.infrastructure.mapper.UserMapper;
-import org.apache.commons.lang3.StringUtils;
+import com.disk.user.infrastructure.util.UserConstants;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RScoredSortedSet;
@@ -26,13 +29,13 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static com.disk.user.infrastructure.constant.UserConstant.DEFAULT_NICK_NAME_PREFIX;
 import static com.disk.user.infrastructure.exception.UserErrorCode.DUPLICATE_TELEPHONE_NUMBER;
+import static com.disk.user.infrastructure.exception.UserErrorCode.USER_INFO_FAIL;
+import static com.disk.user.infrastructure.exception.UserErrorCode.USER_NOT_EXIST;
 
 /**
  * 类描述: 用户服务
@@ -41,6 +44,10 @@ import static com.disk.user.infrastructure.exception.UserErrorCode.DUPLICATE_TEL
  */
 @Service
 public class UserService extends ServiceImpl<UserMapper, UserDO> implements InitializingBean {
+
+    @DubboReference(version = "1.0.0")
+    private UserFileFacadeService userFileFacadeService;
+
 
     @Autowired
     private RedissonClient redissonClient;
@@ -63,13 +70,13 @@ public class UserService extends ServiceImpl<UserMapper, UserDO> implements Init
     /**
      * 根据id查询用户信息
      *
-     * @param telephone
+     * @param email
      * @return
      */
     @Cached(name = "user:cached:telephone:", expire = 3000, cacheType = CacheType.BOTH, key = "#telephone", cacheNullValue = true)
     @CacheRefresh(refresh = 60, timeUnit = TimeUnit.HOURS)
-    public UserDO findByTelephone(String telephone) {
-       return userMapper.findByTelephone(telephone);
+    public UserDO findByEmail(String email) {
+       return userMapper.findByEmail(email);
     }
 
 
@@ -86,57 +93,6 @@ public class UserService extends ServiceImpl<UserMapper, UserDO> implements Init
         return userDO;
     }
 
-    /**
-     * 通过手机号和密码查询用户信息
-     *
-     * @param telephone
-     * @param password
-     * @return
-     */
-    public UserDO findByTelephoneAndPass(String telephone, String password) {
-        return userMapper.findByTelephoneAndPass(telephone, DigestUtil.md5Hex(password));
-    }
-
-    /**
-     * 用户注册
-     * @param telephone
-     * @param inviteCode
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public UserOperatorResponse register(String telephone, String inviteCode) {
-        String defaultNickName;
-        String randomString;
-        do {
-            randomString = RandomUtil.randomString(6).toUpperCase();
-            //前缀 + 6位随机数 + 手机号后四位
-            defaultNickName = DEFAULT_NICK_NAME_PREFIX + randomString + telephone.substring(7, 11);
-        } while (nickNameExist(defaultNickName) || inviteCodeExist(randomString));
-
-        String inviterId = null;
-        if (StringUtils.isNotBlank(inviteCode)) {
-            UserDO inviter = userMapper.findByInviteCode(inviteCode);
-            if (inviter != null) {
-                inviterId = inviter.getId().toString();
-            }
-        }
-
-        UserDO user = doRegister(telephone, defaultNickName, telephone, randomString, inviterId);
-        Assert.notNull(user, UserErrorCode.USER_OPERATE_FAILED.getCode());
-
-        addNickName(defaultNickName);
-        addInviteCode(randomString);
-        updateInviteRank(inviterId);
-//        updateUserCache(user.getId().toString(), user);
-
-        //TODO 加入流水
-
-        UserOperatorResponse userOperatorResponse = new UserOperatorResponse();
-        userOperatorResponse.setSuccess(true);
-
-        return userOperatorResponse;
-    }
-
 
     public boolean nickNameExist(String nickName) {
         //如果布隆过滤器中存在，再进行数据库二次判断
@@ -147,35 +103,35 @@ public class UserService extends ServiceImpl<UserMapper, UserDO> implements Init
         return false;
     }
 
-    public boolean inviteCodeExist(String inviteCode) {
-        //如果布隆过滤器中存在，再进行数据库二次判断
-        if (this.inviteCodeBloomFilter != null && this.inviteCodeBloomFilter.contains(inviteCode)) {
-            return userMapper.findByInviteCode(inviteCode) != null;
-        }
-
-        return false;
+    public UserDO register(UserRegisterRequest request) {
+        UserDO insertDO = new UserDO();
+        insertDO.setEmail(request.getEmail());
+        insertDO.setNickName(request.getNickname());
+        insertDO.setId(IdUtil.get());
+        insertDO.setPasswordHash(PasswordUtil.encryptPassword(request.getPassword()));
+        insertDO.setUseSpace(UserConstants.USER_INIT_SPACE);
+        insertDO.setDeleted(DeleteEnum.NO.getCode());
+        insertDO.setLastLoginTime(new Date());
+        insertDO.setProfilePhotoUrl("https://avatars.githubusercontent.com/u/25891014?v=4");
+        userMapper.insert(insertDO);
+        return insertDO;
     }
 
     /**
      * 注册
      *
-     * @param telephone
+     * @param email
      * @param nickName
      * @param password
      * @return
      */
-    private UserDO doRegister(String telephone, String nickName, String password, String inviteCode, String inviterId) {
-        if (userMapper.findByTelephone(telephone) != null) {
+    private UserDO doRegister(String email, String nickName, String password) {
+        if (userMapper.findByEmail(email) != null) {
             throw new UserException(DUPLICATE_TELEPHONE_NUMBER);
         }
 
         UserDO user = new UserDO();
-        user.register(telephone, nickName, password, inviteCode, inviterId);
-//        user.setRealName("abc");
-//        user.setDeleted(0);
-//        user.setGmtCreate(new Date());
-//        user.setGmtModified(new Date());
-//        user.setLockVersion(0);
+        user.register(email, nickName, password);
         return save(user) ? user : null;
     }
 
@@ -217,5 +173,25 @@ public class UserService extends ServiceImpl<UserMapper, UserDO> implements Init
         }
 
         this.inviteRank = redissonClient.getScoredSortedSet("inviteRank");
+    }
+
+    public UserInfoVO getUserInfo(Long userId) {
+        UserDO userDO = this.findById(userId);
+        if (EmptyUtil.isEmpty(userDO)) {
+            throw new UserException(USER_NOT_EXIST);
+        }
+        UserFileQueryRequest userFileQueryRequest = new UserFileQueryRequest(userId);
+        UserFileQueryResponse<UserFileData> userFileInfo = userFileFacadeService.getUserFileInfo(userFileQueryRequest);
+        UserFileData data = userFileInfo.getData();
+        if (EmptyUtil.isEmpty(data)) {
+            throw new UserException(USER_INFO_FAIL);
+        }
+        UserInfoVO userInfoVO = new UserInfoVO();
+        userInfoVO.setNickname(userDO.getNickName());
+        userInfoVO.setRootFileId(data.getId());
+        userInfoVO.setRootFilename(data.getFilename());
+        userInfoVO.setUserId(data.getUserId());
+        userInfoVO.setProfilePhotoUrl(userDO.getProfilePhotoUrl());
+        return userInfoVO;
     }
 }

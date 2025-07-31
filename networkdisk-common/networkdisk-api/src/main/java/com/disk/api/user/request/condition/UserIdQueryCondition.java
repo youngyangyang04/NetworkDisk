@@ -6,8 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serial;
+
 /**
- * @author Hollis
+ * @author weikunkun
  */
 @Getter
 @Setter
@@ -16,7 +18,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class UserIdQueryCondition implements UserQueryCondition {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1218202388932341345L;
 
     /**
      * 用户ID

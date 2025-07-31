@@ -14,6 +14,7 @@ import com.aliyun.oss.model.UploadPartRequest;
 import com.aliyun.oss.model.UploadPartResult;
 import com.disk.base.constant.BaseConstant;
 import com.disk.base.exception.SystemException;
+import com.disk.base.utils.EmptyUtil;
 import com.disk.base.utils.FileUtil;
 import com.disk.base.utils.UUIDUtil;
 import com.disk.file.config.OssStorageEngineConfig;
@@ -177,7 +178,7 @@ public class OssStorageEngine extends AbstractStorageEngine {
 
         ChunkUploadEntity entity = getCache().get(cacheKey, ChunkUploadEntity.class);
 
-        if (Objects.isNull(entity)) {
+        if (EmptyUtil.isEmpty(entity)) {
             entity = initChunkUpload(context.getFilename(), cacheKey);
         }
 
@@ -191,7 +192,7 @@ public class OssStorageEngine extends AbstractStorageEngine {
 
         UploadPartResult result = client.uploadPart(request);
 
-        if (Objects.isNull(result)) {
+        if (EmptyUtil.isEmpty(result)) {
             throw new SystemException("文件分片上传失败");
         }
 
@@ -231,7 +232,7 @@ public class OssStorageEngine extends AbstractStorageEngine {
 
         ChunkUploadEntity entity = getCache().get(cacheKey, ChunkUploadEntity.class);
 
-        if (Objects.isNull(entity)) {
+        if (EmptyUtil.isEmpty(entity)) {
             throw new SystemException("文件分片合并失败，文件的唯一标识为：" + context.getIdentifier());
         }
 
@@ -252,7 +253,7 @@ public class OssStorageEngine extends AbstractStorageEngine {
 
         CompleteMultipartUploadRequest request = new CompleteMultipartUploadRequest(config.getBucketName(), entity.getObjectKey(), entity.uploadId, partETags);
         CompleteMultipartUploadResult result = client.completeMultipartUpload(request);
-        if (Objects.isNull(result)) {
+        if (EmptyUtil.isEmpty(result)) {
             throw new SystemException("文件分片合并失败，文件的唯一标识为：" + context.getIdentifier());
         }
 
@@ -270,7 +271,7 @@ public class OssStorageEngine extends AbstractStorageEngine {
     @Override
     protected void doReadFile(ReadFileContext context) throws IOException {
         OSSObject ossObject = client.getObject(config.getBucketName(), context.getRealPath());
-        if (Objects.isNull(ossObject)) {
+        if (EmptyUtil.isEmpty(ossObject)) {
             throw new SystemException("文件读取失败，文件的名称为：" + context.getRealPath());
         }
         FileUtil.writeStreamToStreamNormal(ossObject.getObjectContent(), context.getOutputStream());
@@ -306,7 +307,7 @@ public class OssStorageEngine extends AbstractStorageEngine {
      * @return baseUrl?paramKey1=paramValue1&paramKey2=paramValue2
      */
     private String assembleUrl(String baseUrl, JSONObject params) {
-        if (Objects.isNull(params) || params.isEmpty()) {
+        if (EmptyUtil.isEmpty(params) || params.isEmpty()) {
             return baseUrl;
         }
         StringBuffer urlStringBuffer = new StringBuffer(baseUrl);
@@ -404,7 +405,7 @@ public class OssStorageEngine extends AbstractStorageEngine {
         InitiateMultipartUploadRequest request = new InitiateMultipartUploadRequest(config.getBucketName(), filePath);
         InitiateMultipartUploadResult result = client.initiateMultipartUpload(request);
 
-        if (Objects.isNull(result)) {
+        if (EmptyUtil.isEmpty(result)) {
             throw new SystemException("文件分片上传初始化失败");
         }
 

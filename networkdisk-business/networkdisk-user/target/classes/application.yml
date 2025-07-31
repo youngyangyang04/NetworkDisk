@@ -4,7 +4,7 @@ spring:
   config:
     import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml
 server:
-  port: 8085
+  port: 8086
 
 #dubbo:
 #  protocol:

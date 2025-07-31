@@ -26,6 +26,7 @@ public class LoginResVO implements Serializable {
      * 用户标识，如用户ID
      */
     private String userId;
+
     /**
      * 访问令牌
      */

@@ -29,7 +29,7 @@ import static com.disk.cache.constant.CacheConstant.CACHE_KEY_SEPARATOR;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("token")
+@RequestMapping("/api/v1/token")
 public class TokenController {
 
     @Autowired

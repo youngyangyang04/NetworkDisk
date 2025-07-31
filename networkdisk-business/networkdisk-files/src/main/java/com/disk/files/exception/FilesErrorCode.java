@@ -18,6 +18,10 @@ public enum FilesErrorCode implements ErrorCode {
     FILE_DELETE_ERROR("FILE_DELETE_ERROR", "文件删除失败"),
     FILE_RENAME_ERROR("FILE_RENAME_ERROR", "文件重命名失败"),
     FILE_IDENTIFIER_NOT_EXIST("FILE_IDENTIFIER_NOT_EXIST", "文件唯一标识符不存在"),
+    FILE_NO_AUTH("FILE_NO_AUTH", "无权限操作该文件"),
+    FOLDER_NOT_DOWNLOAD("FOLDER_NOT_DOWNLOAD", "文件夹暂不支持下载"),
+    TARGET_FOLDER_TYPE_ERROR("TARGET_FOLDER_TYPE_ERROR", "目标文件不是一个文件夹"),
+    FOLDER_INVALID("FOLDER_INVALID", "目标文件夹ID不能是选中文件列表的文件夹ID或其子文件夹ID"),
 
     ;
     private final String code;

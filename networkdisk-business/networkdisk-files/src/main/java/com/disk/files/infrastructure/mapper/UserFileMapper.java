@@ -1,8 +1,10 @@
 package com.disk.files.infrastructure.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.disk.files.domain.context.FileSearchContext;
 import com.disk.files.domain.context.QueryFileContext;
 import com.disk.files.domain.entity.UserFileDO;
+import com.disk.files.domain.response.FileSearchVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -22,5 +24,16 @@ public interface UserFileMapper extends BaseMapper<UserFileDO> {
      * @return
      */
     List<UserFileDO> listUserFiles(@Param("param") QueryFileContext context);
+
+    /**
+     * 文件搜索
+     *
+     * @param context
+     * @return
+     */
+    List<UserFileDO> searchFile(@Param("param") FileSearchContext context);
+
+    UserFileDO getUserRootInfo(@Param("param") QueryFileContext context);
+
 
 }
