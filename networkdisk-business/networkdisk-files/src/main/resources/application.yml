@@ -2,7 +2,7 @@ spring:
   application:
     name: @application.name@
   config:
-    import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml
+    import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml,classpath:es.yml
   servlet:
     multipart:
       max-file-size: 4096MB

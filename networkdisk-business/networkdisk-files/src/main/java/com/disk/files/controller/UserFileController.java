@@ -266,10 +266,10 @@ public class UserFileController {
     }
 
     /**
-     * 文件搜索
+     * 文件搜索 ES
      */
-    @GetMapping("/file/search")
-    public Result<List<FileSearchVO>> search(@Validated FileSearchParamVO fileSearchParam) {
+    @PostMapping("/file/search")
+    public Result<List<FileSearchVO>> search(@Validated @RequestBody FileSearchParamVO fileSearchParam) {
         FileSearchContext context = new FileSearchContext();
         context.setKeyword(fileSearchParam.getKeyword());
         context.setUserId(UserIdUtil.get());

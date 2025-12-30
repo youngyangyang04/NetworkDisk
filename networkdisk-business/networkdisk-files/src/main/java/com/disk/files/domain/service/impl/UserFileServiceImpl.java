@@ -35,6 +35,7 @@ import com.disk.files.domain.context.UpdateFilenameContext;
 import com.disk.files.domain.entity.FileDO;
 import com.disk.files.domain.entity.UserFileDO;
 import com.disk.files.domain.entity.convertor.FileConvertor;
+import com.disk.files.infrastructure.es.entity.UserFileESEntity;
 import com.disk.files.domain.response.BreadcrumbVO;
 import com.disk.files.domain.response.FileSearchVO;
 import com.disk.files.domain.response.FolderTreeNodeVO;
@@ -45,6 +46,7 @@ import com.disk.files.exception.FileException;
 import com.disk.files.infrastructure.constant.FileConstant;
 import com.disk.files.infrastructure.enums.FileTypeEnum;
 import com.disk.files.infrastructure.enums.FolderFlagEnum;
+import com.disk.files.infrastructure.es.mapper.UserFileESMapper;
 import com.disk.files.infrastructure.mapper.UserFileMapper;
 import com.disk.base.utils.FileUtil;
 import com.disk.lock.DistributeLock;
@@ -52,6 +54,7 @@ import com.google.common.collect.Lists;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -98,6 +101,9 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
     private StorageEngine storageEngine;
     @Autowired
     private UserFileMapper userFileMapper;
+
+    @Autowired
+    private UserFileESMapper fileEsMapper;
 
 
     @Override
@@ -353,7 +359,32 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
 
     @Override
     public List<FileSearchVO> search(FileSearchContext context) {
-        List<FileSearchVO> result = doSearch(context);
+        List<FileSearchVO> result;
+        if (fileEsMapper != null) {
+            // 优先走 ES
+            LambdaEsQueryWrapper<UserFileESEntity> wrapper = new LambdaEsQueryWrapper<>();
+            wrapper.like(UserFileESEntity::getFilename, context.getKeyword());
+            wrapper.eq(UserFileESEntity::getUserId, context.getUserId());
+            wrapper.eq(UserFileESEntity::getDeleted, com.disk.base.enums.DeleteEnum.NO.getCode());
+            if (!EmptyUtil.isEmpty(context.getFileTypeArray())) {
+                wrapper.in(UserFileESEntity::getFileType, context.getFileTypeArray());
+            }
+            wrapper.orderByDesc(UserFileESEntity::getGmtModified);
+            List<UserFileESEntity> docs = fileEsMapper.selectList(wrapper);
+            result = docs.stream().map(doc -> {
+                com.disk.files.domain.response.FileSearchVO vo = new com.disk.files.domain.response.FileSearchVO();
+                vo.setFileId(doc.getId());
+                vo.setFilename(doc.getFilename());
+                vo.setParentId(doc.getParentId());
+                vo.setFolderFlag(doc.getFolderFlag());
+                vo.setFileType(doc.getFileType());
+                vo.setFileSizeDesc(doc.getFileSizeDesc());
+                return vo;
+            }).toList();
+        } else {
+            // 回退 MySQL
+            result = doSearch(context);
+        }
         fillParentFilename(result);
         return result;
     }

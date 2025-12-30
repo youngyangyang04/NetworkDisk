@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.disk.recycle.infrastructure.mapper.UserFileMapper">
+
+    <resultMap id="BaseResultMap" type="com.disk.recycle.domain.entity.UserFileDO">
+        <id property="id" column="ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="parentId" column="PARENT_ID"/>
+        <result property="realFileId" column="REAL_FILE_ID"/>
+        <result property="filename" column="FILENAME"/>
+        <result property="folderFlag" column="FOLDER_FLAG"/>
+        <result property="fileSizeDesc" column="FILE_SIZE_DESC"/>
+        <result property="fileType" column="FILE_TYPE"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="gmtCreate" column="GMT_CREATE"/>
+        <result property="gmtModified" column="GMT_MODIFIED"/>
+        <result property="updateUser" column="UPDATE_USER"/>
+        <result property="deleted" column="DELETED"/>
+        <result property="lockVersion" column="LOCK_VERSION"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,user_id,parent_id,real_file_id,filename,folder_flag,file_size_desc,file_type,create_user,gmt_create,gmt_modified,update_user,deleted,lock_version
+    </sql>
+
+    <select id="listDeletedByUser" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from user_file
+        where deleted != 0 and user_id = #{userId}
+        order by gmt_modified desc
+    </select>
+
+    <update id="restoreByIds">
+        update user_file
+        set deleted = 0, update_user = #{userId}, gmt_modified = now()
+        where user_id = #{userId}
+          and deleted != 0
+          and id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <delete id="hardDeleteByIds">
+        delete from user_file
+        where user_id = #{userId}
+          and deleted != 0
+          and id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+
+</mapper>
+
+
+
+
