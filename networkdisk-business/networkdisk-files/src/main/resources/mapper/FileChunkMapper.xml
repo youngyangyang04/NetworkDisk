@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.disk.files.infrastructure.mapper.FileChunkMapper">
+
+    <resultMap id="BaseResultMap" type="com.disk.files.domain.entity.FileChunkDO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="identifier" column="identifier" jdbcType="VARCHAR"/>
+        <result property="realPath" column="real_path" jdbcType="VARCHAR"/>
+        <result property="chunkNumber" column="chunk_number" jdbcType="INTEGER"/>
+        <result property="expirationTime" column="expiration_time" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="create_user" jdbcType="BIGINT"/>
+        <result property="gmtCreate" column="GMT_CREATE"/>
+        <result property="gmtModified" column="GMT_MODIFIED"/>
+        <result property="deleted" column="DELETED"/>
+        <result property="lockVersion" column="LOCK_VERSION"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,identifier,real_path,
+        chunk_number,expiration_time,create_user,gmt_create
+    </sql>
+</mapper>

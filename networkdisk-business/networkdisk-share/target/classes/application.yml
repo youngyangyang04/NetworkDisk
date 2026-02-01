@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: networkdisk-share
+  config:
+    import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml
+server:
+  port: 8085
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

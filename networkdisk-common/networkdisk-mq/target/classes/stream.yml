@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    stream:
+      rocketmq:
+        binder:
+          # rocketmq 地址
+          name-server: 192.168.0.1:9876 #rocketmq的地址，如果你要用他，这里需要改成你自己的

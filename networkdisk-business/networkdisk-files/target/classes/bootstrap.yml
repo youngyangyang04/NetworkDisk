@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: networkdisk-files
+  config:
+    import: classpath:config.yml

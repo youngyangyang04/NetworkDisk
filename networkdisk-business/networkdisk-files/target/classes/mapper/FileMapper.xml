@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.disk.files.infrastructure.mapper.FileMapper">
+
+    <resultMap id="BaseResultMap" type="com.disk.files.domain.entity.FileDO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="filename" column="filename" jdbcType="VARCHAR"/>
+        <result property="realPath" column="real_path" jdbcType="VARCHAR"/>
+        <result property="fileSize" column="file_size" jdbcType="VARCHAR"/>
+        <result property="fileSizeDesc" column="file_size_desc" jdbcType="VARCHAR"/>
+        <result property="fileSuffix" column="file_suffix" jdbcType="VARCHAR"/>
+        <result property="filePreviewContentType" column="file_preview_content_type" jdbcType="VARCHAR"/>
+        <result property="identifier" column="identifier" jdbcType="VARCHAR"/>
+        <result property="createUser" column="create_user" jdbcType="BIGINT"/>
+        <result property="gmtCreate" column="GMT_CREATE"/>
+        <result property="gmtModified" column="GMT_MODIFIED"/>
+        <result property="deleted" column="DELETED"/>
+        <result property="lockVersion" column="LOCK_VERSION"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        ,filename,real_path,
+        file_size,file_size_desc,file_suffix,
+        file_preview_content_type,identifier,create_user,
+        create_time
+    </sql>
+</mapper>

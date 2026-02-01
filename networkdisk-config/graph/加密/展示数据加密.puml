@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+actor 用户
+
+用户 -> 浏览器: 访问文件
+浏览器 -> 网盘服务: 获取用户文件列表信息
+activate 网盘服务
+网盘服务 -> 网盘服务: 查询用户文件列表
+网盘服务 -> 网盘服务: 填充文件信息
+网盘服务 -> 浏览器: 返回数据(<color red>敏感字段使用IdEncryptSerializer加密</color>)
+deactivate
+浏览器 -> 用户: 展示数据
+
+用户 -> 浏览器: 操作数据
+浏览器 -> 网盘服务: 操作数据请求VO
+activate 网盘服务
+网盘服务 -> 网盘服务: <color red>IdUtil.decrypt解密数据敏感字段</color>
+网盘服务 -> 网盘服务: 请求VO转化上下文对象
+网盘服务 -> 网盘服务: 执行业务逻辑
+网盘服务 -> 浏览器: 执行结果
+deactivate
+浏览器 -> 用户: 执行结果
+@enduml

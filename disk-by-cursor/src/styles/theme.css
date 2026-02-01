@@ -1,0 +1,315 @@
+/* 全局主题样式 - 基于 r-pan-portal 风格 */
+
+:root {
+  /* 主色调 */
+  --primary-color: #667eea;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  
+  /* 背景色 */
+  --bg-primary: #FAFCFF;
+  --bg-secondary: #fff;
+  --bg-tertiary: #f2f2f2;
+  
+  /* 文字颜色 */
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-muted: #999;
+  
+  /* 边框颜色 */
+  --border-color: #e6e6e6;
+  --border-light: #e9ecef;
+  
+  /* 阴影 */
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.15);
+  
+  /* 圆角 */
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 20px;
+  
+  /* 字体 */
+  --font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+}
+
+/* 全局样式重置 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* 通用容器样式 */
+.pan-container {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+/* 按钮样式 */
+.pan-btn-primary {
+  background: var(--primary-gradient);
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.pan-btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* 表格样式 */
+.pan-table {
+  border: none;
+  width: 100% !important;
+  table-layout: fixed;
+}
+
+.pan-table :deep(.el-table) {
+  width: 100% !important;
+  table-layout: fixed;
+}
+
+.pan-table :deep(.el-table__body-wrapper) {
+  overflow-x: auto;
+}
+
+.pan-table :deep(.el-table__header-wrapper) {
+  overflow: visible;
+}
+
+.pan-table :deep(.el-table__header) {
+  background: var(--bg-tertiary);
+}
+
+.pan-table :deep(.el-table__header th) {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.pan-table :deep(.el-table__row) {
+  transition: all 0.3s ease;
+}
+
+.pan-table :deep(.el-table__row:hover) {
+  background: var(--bg-tertiary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-light);
+}
+
+/* 面包屑样式 */
+.pan-breadcrumb {
+  background: var(--bg-secondary);
+  padding: 16px 20px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-light);
+}
+
+.pan-breadcrumb-item {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pan-breadcrumb-item:hover {
+  color: var(--primary-color);
+}
+
+/* 工具栏样式 */
+.pan-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-light);
+}
+
+/* 对话框样式 */
+.pan-dialog {
+  border-radius: var(--border-radius-lg);
+}
+
+.pan-dialog :deep(.el-dialog__header) {
+  background: var(--primary-gradient);
+  color: #fff;
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.pan-dialog :deep(.el-dialog__title) {
+  color: #fff;
+}
+
+.pan-dialog :deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: #fff;
+}
+
+/* 任务列表样式 */
+.pan-task-list {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-heavy);
+  z-index: 1000;
+  max-height: 400px;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.pan-task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-tertiary);
+  font-weight: 600;
+}
+
+.pan-task-body {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.pan-task-item {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background-color 0.3s;
+}
+
+.pan-task-item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.pan-task-item:last-child {
+  border-bottom: none;
+}
+
+/* 文件操作按钮样式 */
+.pan-file-operations {
+  position: absolute;
+  right: 100px;
+  top: 8px;
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 12px;
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-medium);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.pan-file-operations .el-button {
+  transition: all 0.3s ease;
+}
+
+.pan-file-operations .el-button:hover {
+  transform: scale(1.1);
+}
+
+/* 状态颜色 */
+.pan-status-uploading {
+  color: #409eff;
+}
+
+.pan-status-success {
+  color: #67c23a;
+}
+
+.pan-status-error {
+  color: #f56c6c;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .pan-toolbar {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .pan-toolbar-left,
+  .pan-toolbar-right {
+    justify-content: center;
+  }
+  
+  .pan-task-list {
+    width: calc(100vw - 40px);
+    right: 20px;
+    left: 20px;
+  }
+  
+  .pan-file-operations {
+    right: 20px;
+    top: 8px;
+  }
+}
+
+/* 动画效果 */
+.pan-fade-enter-active,
+.pan-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.pan-fade-enter-from,
+.pan-fade-leave-to {
+  opacity: 0;
+}
+
+.pan-slide-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.pan-slide-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.pan-slide-enter-from,
+.pan-slide-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+} 
