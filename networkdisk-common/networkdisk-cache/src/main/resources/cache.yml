@@ -8,7 +8,7 @@ spring:
         enabled: true
   redis:
     redisson:
-      config: |
+      config:
         singleServerConfig:
           idleConnectionTimeout: 10000
           connectTimeout: 10000
