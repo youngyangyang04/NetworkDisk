@@ -8,7 +8,7 @@
         <h2>用户注册</h2>
         <p>创建您的卡码网盘账号，开启云端存储之旅</p>
       </div>
-      
+
       <el-form
         ref="registerFormRef"
         :model="registerForm"
@@ -16,16 +16,26 @@
         class="register-form"
         @submit.prevent="handleRegister"
       >
-        <el-form-item prop="username">
+        <el-form-item prop="email">
           <el-input
-            v-model="registerForm.username"
-            placeholder="请输入用户名"
+            v-model="registerForm.email"
+            placeholder="Email"
             prefix-icon="User"
             size="large"
             class="custom-input"
           />
         </el-form-item>
-        
+
+        <el-form-item prop="nickName">
+          <el-input
+            v-model="registerForm.nickName"
+            placeholder="Nickname"
+            prefix-icon="UserFilled"
+            size="large"
+            class="custom-input"
+          />
+        </el-form-item>
+
         <el-form-item prop="password">
           <el-input
             v-model="registerForm.password"
@@ -37,33 +47,19 @@
             class="custom-input"
           />
         </el-form-item>
-        
-        <el-form-item prop="question">
-          <el-select
-            v-model="registerForm.question"
-            placeholder="请选择密保问题"
-            size="large"
-            style="width: 100%"
-            class="custom-select"
-          >
-            <el-option label="您的出生地是？" value="您的出生地是？" />
-            <el-option label="您最喜欢的颜色是？" value="您最喜欢的颜色是？" />
-            <el-option label="您的宠物名字是？" value="您的宠物名字是？" />
-            <el-option label="您的母校是？" value="您的母校是？" />
-            <el-option label="您最喜欢的电影是？" value="您最喜欢的电影是？" />
-          </el-select>
-        </el-form-item>
-        
-        <el-form-item prop="answer">
+
+        <el-form-item prop="confirmPassword">
           <el-input
-            v-model="registerForm.answer"
-            placeholder="请输入密保答案"
-            prefix-icon="Key"
+            v-model="registerForm.confirmPassword"
+            type="password"
+            placeholder="Confirm password"
+            prefix-icon="Lock"
             size="large"
+            show-password
             class="custom-input"
           />
         </el-form-item>
-        
+
         <el-form-item>
           <el-button
             type="primary"
@@ -76,7 +72,7 @@
             {{ loading ? '注册中...' : '注册' }}
           </el-button>
         </el-form-item>
-        
+
         <div class="register-footer">
           <el-link type="primary" @click="$router.push('/login')" class="login-link">
             <el-icon><Right /></el-icon>
@@ -85,8 +81,7 @@
         </div>
       </el-form>
     </div>
-    
-    <!-- 背景装饰 -->
+
     <div class="bg-decoration">
       <div class="circle circle-1"></div>
       <div class="circle circle-2"></div>
@@ -108,14 +103,18 @@ const registerFormRef = ref()
 const loading = ref(false)
 
 const registerForm = reactive({
-  username: '',
+  email: '',
+  nickName: '',
   password: '',
-  question: '',
-  answer: ''
+  confirmPassword: ''
 })
 
 const registerRules = {
-  username: [
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '邮箱格式错误', trigger: ['blur', 'change'] }
+  ],
+  nickName: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, message: '用户名长度不能少于3位', trigger: 'blur' }
   ],
@@ -123,23 +122,34 @@ const registerRules = {
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
   ],
-  question: [
-    { required: true, message: '请选择密保问题', trigger: 'change' }
-  ],
-  answer: [
-    { required: true, message: '请输入密保答案', trigger: 'blur' }
+  confirmPassword: [
+    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    {
+      validator: (_, value, callback) => {
+        if (value !== registerForm.password) {
+          callback(new Error('两次密码不一致'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
   ]
 }
 
 const handleRegister = async () => {
   if (!registerFormRef.value) return
-  
+
   try {
     await registerFormRef.value.validate()
     loading.value = true
-    
-    const result = await userStore.registerAction(registerForm)
-    
+
+    const result = await userStore.registerAction({
+      email: registerForm.email,
+      nickName: registerForm.nickName,
+      password: registerForm.password
+    })
+
     if (result.success) {
       ElMessage.success('注册成功，请登录')
       router.push('/login')
@@ -226,20 +236,6 @@ const handleRegister = async () => {
   box-shadow: 0 0 0 2px var(--primary-color);
 }
 
-.custom-select :deep(.el-input__wrapper) {
-  border-radius: var(--border-radius);
-  box-shadow: 0 0 0 1px var(--border-color);
-  transition: all 0.3s ease;
-}
-
-.custom-select :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px var(--primary-color);
-}
-
-.custom-select :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 2px var(--primary-color);
-}
-
 .register-btn {
   width: 100%;
   height: 48px;
@@ -278,7 +274,6 @@ const handleRegister = async () => {
   transform: translateY(-1px);
 }
 
-/* 背景装饰 */
 .bg-decoration {
   position: absolute;
   top: 0;
@@ -328,15 +323,14 @@ const handleRegister = async () => {
   }
 }
 
-/* 响应式设计 */
 @media (max-width: 480px) {
   .register-box {
     width: 90%;
     padding: 32px;
   }
-  
+
   .register-header h2 {
     font-size: 24px;
   }
 }
-</style> 
+</style>

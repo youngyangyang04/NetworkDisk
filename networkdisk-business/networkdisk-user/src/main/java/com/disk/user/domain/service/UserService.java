@@ -22,6 +22,7 @@ import com.disk.user.infrastructure.exception.UserException;
 import com.disk.user.infrastructure.mapper.UserMapper;
 import com.disk.user.infrastructure.util.UserConstants;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RScoredSortedSet;
@@ -36,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import static com.disk.user.infrastructure.exception.UserErrorCode.DUPLICATE_TELEPHONE_NUMBER;
 import static com.disk.user.infrastructure.exception.UserErrorCode.USER_INFO_FAIL;
 import static com.disk.user.infrastructure.exception.UserErrorCode.USER_NOT_EXIST;
+import static com.disk.user.infrastructure.exception.UserErrorCode.USER_OPERATE_FAILED;
 
 /**
  * 类描述: 用户服务
@@ -104,12 +106,24 @@ public class UserService extends ServiceImpl<UserMapper, UserDO> implements Init
     }
 
     public UserDO register(UserRegisterRequest request) {
+        if (request == null || StringUtils.isBlank(request.getEmail()) || StringUtils.isBlank(request.getPassword())) {
+            throw new UserException(USER_OPERATE_FAILED);
+        }
+        if (userMapper.findByEmail(request.getEmail()) != null) {
+            throw new UserException(DUPLICATE_TELEPHONE_NUMBER);
+        }
+
+        String nickName = StringUtils.isBlank(request.getNickname())
+                ? StringUtils.defaultIfBlank(StringUtils.substringBefore(request.getEmail(), "@"), request.getEmail())
+                : request.getNickname();
+
         UserDO insertDO = new UserDO();
         insertDO.setEmail(request.getEmail());
-        insertDO.setNickName(request.getNickname());
+        insertDO.setNickName(nickName);
         insertDO.setId(IdUtil.get());
         insertDO.setPasswordHash(PasswordUtil.encryptPassword(request.getPassword()));
-        insertDO.setUseSpace(UserConstants.USER_INIT_SPACE);
+        insertDO.setUseSpace(0L);
+        insertDO.setTotalSpace(UserConstants.USER_INIT_SPACE);
         insertDO.setDeleted(DeleteEnum.NO.getCode());
         insertDO.setLastLoginTime(new Date());
         insertDO.setProfilePhotoUrl("https://avatars.githubusercontent.com/u/25891014?v=4");

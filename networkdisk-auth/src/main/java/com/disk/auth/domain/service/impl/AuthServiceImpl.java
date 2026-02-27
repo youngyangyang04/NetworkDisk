@@ -22,8 +22,6 @@ import com.disk.base.utils.IdUtil;
 import com.disk.base.utils.JWTUtil;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +68,9 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public Long register(RegisterContext registerContext) {
+        if (registerContext == null) {
+            throw new AuthException(AuthErrorCode.USER_REGISTER_FAIL);
+        }
         //注册
         UserRegisterRequest userRegisterRequest = new UserRegisterRequest();
         userRegisterRequest.setEmail(registerContext.getEmail());
@@ -77,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
         userRegisterRequest.setNickname(registerContext.getNickName());
 
         UserOperatorResponse<UserInfo> register = userFacadeService.register(userRegisterRequest);
-        if (Boolean.FALSE.equals(register.getSuccess())) {
+        if (register == null || Boolean.FALSE.equals(register.getSuccess()) || register.getData() == null) {
             throw new AuthException(AuthErrorCode.USER_REGISTER_FAIL);
         }
         UserInfo userInfo = register.getData();
@@ -86,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
         userFileOperateReqest.setUserId(userInfo.getUserId());
         userFileOperateReqest.setParentId(BaseConstant.ROOT_PARENT_ID);
         UserFileOperateResponse<Long> userRootFile = userFileFacadeService.createUserRootFile(userFileOperateReqest);
-        if (Boolean.FALSE.equals(userRootFile.getSuccess())) {
+        if (userRootFile == null || Boolean.FALSE.equals(userRootFile.getSuccess())) {
             throw new AuthException(AuthErrorCode.USER_REGISTER_FAIL);
         }
         return userInfo.getUserId();

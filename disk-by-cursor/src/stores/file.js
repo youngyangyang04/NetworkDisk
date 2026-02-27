@@ -24,9 +24,13 @@ export const useFileStore = defineStore('file', () => {
       console.log('[fileStore] 文件列表API响应:', res)
       files.value = res.data || []
       
-      const bcRes = await getBreadcrumbs({ fileId: parentId.value })
-      console.log('[fileStore] 面包屑API响应:', bcRes)
-      breadcrumbs.value = bcRes.data || []
+      if (parentId.value) {
+        const bcRes = await getBreadcrumbs({ fileId: parentId.value })
+        console.log('[fileStore] 面包屑API响应:', bcRes)
+        breadcrumbs.value = bcRes.data || []
+      } else {
+        breadcrumbs.value = []
+      }
       
       console.log('[fileStore] 加载完成，文件数量:', files.value.length, '面包屑数量:', breadcrumbs.value.length)
     } catch (error) {

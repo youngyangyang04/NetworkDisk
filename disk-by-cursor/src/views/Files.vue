@@ -243,10 +243,13 @@ const shareFormRef = ref(null)
   }
 
 // 监听路由参数变化，处理侧边栏点击
-watch(() => route.query.type, (newType) => {
+watch([() => route.query.type, () => userStore.rootFileId], ([newType, rootFileId]) => {
+  if (!rootFileId) {
+    return
+  }
   const fileTypes = newType ? typeMap[newType] || '-1' : typeMap.all
   loading.value = true
-  fileStore.loadFiles(userStore.rootFileId, fileTypes).finally(() => loading.value = false)
+  fileStore.loadFiles(rootFileId, fileTypes).finally(() => loading.value = false)
 }, { immediate: true })
 
 // 获取行类名，用于鼠标悬停效果
@@ -897,4 +900,4 @@ onMounted(() => {
     padding: 8px 4px;
   }
 }
-</style> 
+</style>

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-28T19:19:47+0800",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260101-2150, environment: Java 21.0.9 (Eclipse Adoptium)"
+    date = "2026-02-27T14:30:55+0800",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)"
 )
 @Component
 public class AuthConvertorImpl implements AuthConvertor {
@@ -28,9 +28,6 @@ public class AuthConvertorImpl implements AuthConvertor {
         }
         if ( loginParamVO.getEmail() != null ) {
             loginContext.setEmail( loginParamVO.getEmail() );
-        }
-        if ( loginParamVO.getNickName() != null ) {
-            loginContext.setNickName( loginParamVO.getNickName() );
         }
         if ( loginParamVO.getPassword() != null ) {
             loginContext.setPassword( loginParamVO.getPassword() );
