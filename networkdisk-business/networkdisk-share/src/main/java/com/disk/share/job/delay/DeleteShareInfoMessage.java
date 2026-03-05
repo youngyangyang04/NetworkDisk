@@ -1,6 +1,7 @@
 package com.disk.share.job.delay;
 
 import com.disk.delayqueue.DelayMessage;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,6 +14,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode(callSuper = false)
 public class DeleteShareInfoMessage extends DelayMessage {
 
     private Long shareId;

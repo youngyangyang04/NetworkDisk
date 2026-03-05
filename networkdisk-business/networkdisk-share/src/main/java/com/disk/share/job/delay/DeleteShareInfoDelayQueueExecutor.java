@@ -49,6 +49,6 @@ public class DeleteShareInfoDelayQueueExecutor implements DelayQueueExecutor<Del
 
     @Override
     public DeleteShareInfoMessage take() throws InterruptedException {
-        return null;
+        return delayQueueHolder.take(queueName());
     }
 }

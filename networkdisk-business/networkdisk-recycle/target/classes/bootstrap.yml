@@ -1,5 +1,5 @@
 spring:
   application:
-    name: networkdisk-user
+    name: networkdisk-recycle
   config:
     import: classpath:config.yml

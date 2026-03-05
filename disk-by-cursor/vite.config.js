@@ -30,6 +30,11 @@ export default defineConfig({
         target: 'http://localhost:8086',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api\/v1\/users/, '/api/v1/users')
+      },
+      '/api/v1/recycles': {
+        target: process.env.VITE_RECYCLE_TARGET || 'http://localhost:8084',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api\/v1\/recycles/, '/api/v1/recycles')
       }
     }
   }

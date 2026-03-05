@@ -50,7 +50,11 @@ public class HttpUtil {
         /**
          * 允许所有请求头
          */
-        CORS_HEADERS("Access-Control-Allow-Headers", "*");
+        CORS_HEADERS("Access-Control-Allow-Headers", "*"),
+        /**
+         * 允许前端读取关键响应头
+         */
+        CORS_EXPOSE_HEADERS("Access-Control-Expose-Headers", "Content-Disposition,Authorization");
 
         private String key;
         private String value;

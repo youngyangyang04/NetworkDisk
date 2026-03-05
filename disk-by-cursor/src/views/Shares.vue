@@ -110,6 +110,7 @@
         </el-form-item>
         
         <el-form-item label="分享文件" prop="shareFileIds">
+          <div v-loading="loadingShareFiles">
           <el-transfer
             v-model="shareForm.shareFileIds"
             :data="fileList"
@@ -120,6 +121,7 @@
             }"
             style="width: 100%"
           />
+          </div>
         </el-form-item>
         
         <el-form-item label="分享类型" prop="shareType">
@@ -173,10 +175,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Link, Key, CopyDocument, Share } from '@element-plus/icons-vue'
 import { getShareList, createShare as createShareApi, cancelShare as cancelShareApi, getShareDetail } from '@/api/share'
+import { getFileList } from '@/api/file'
+import { useUserStore } from '@/stores/user'
 
 // 响应式数据
 const shareList = ref([])
@@ -185,6 +189,9 @@ const showCreateShareDialog = ref(false)
 const showDetailDialog = ref(false)
 const currentShare = ref(null)
 const tableHeight = ref(400)
+const shareFormRef = ref(null)
+const loadingShareFiles = ref(false)
+const userStore = useUserStore()
 
 // 表单数据
 const shareForm = ref({
@@ -204,6 +211,37 @@ const shareRules = {
 }
 
 const fileList = ref([])
+
+const loadShareFileList = async () => {
+  if (!userStore.rootFileId) {
+    await userStore.getUserInfoAction()
+  }
+  if (!userStore.rootFileId) {
+    fileList.value = []
+    return
+  }
+  loadingShareFiles.value = true
+  try {
+    const response = await getFileList({
+      parentId: userStore.rootFileId,
+      fileTypes: '-1'
+    })
+    if (response?.code === 'SUCCESS' || response?.success) {
+      const list = Array.isArray(response.data) ? response.data : []
+      fileList.value = list.map(item => ({
+        fileId: String(item.id),
+        filename: item.folderFlag ? `[文件夹] ${item.filename}` : item.filename
+      }))
+      return
+    }
+    fileList.value = []
+  } catch (error) {
+    fileList.value = []
+    ElMessage.error('加载可分享文件失败')
+  } finally {
+    loadingShareFiles.value = false
+  }
+}
 
 // 计算表格高度
 const calculateTableHeight = () => {
@@ -330,11 +368,21 @@ const cancelShare = async (share) => {
 
 const createShare = async () => {
   try {
+    if (shareFormRef.value) {
+      await shareFormRef.value.validate()
+    }
+    const shareFileIds = Array.isArray(shareForm.value.shareFileIds)
+      ? shareForm.value.shareFileIds.map(item => String(item))
+      : []
+    if (shareFileIds.length === 0) {
+      ElMessage.warning('请选择要分享的文件')
+      return
+    }
     const data = {
-      shareName: shareForm.value.shareName,
-      shareFileIds: shareForm.value.shareFileIds.join(','),
-      shareType: shareForm.value.shareType,
-      shareDayType: shareForm.value.shareDayType
+      shareName: (shareForm.value.shareName || '').trim(),
+      shareFileIds,
+      shareType: Number(shareForm.value.shareType),
+      shareDayType: String(shareForm.value.shareDayType)
     }
     
     const response = await createShareApi(data)
@@ -363,6 +411,12 @@ onMounted(() => {
   loadShareList()
   calculateTableHeight()
   window.addEventListener('resize', calculateTableHeight)
+})
+
+watch(showCreateShareDialog, (visible) => {
+  if (visible) {
+    loadShareFileList()
+  }
 })
 
 onUnmounted(() => {

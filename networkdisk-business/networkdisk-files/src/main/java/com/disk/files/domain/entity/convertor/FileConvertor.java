@@ -57,6 +57,7 @@ public interface FileConvertor {
     List<FileSearchVO> mapToSearchVo(List<UserFileDO> request);
 
     @Mapping(target = "parentId", expression = "java(com.disk.base.utils.IdUtil.decrypt(secUploadFileParam.getParentId()))")
+    @Mapping(target = "userId", expression = "java(com.disk.base.utils.UserIdUtil.get())")
     SecUploadFileContext secUploadFileParamToSecUploadFileContext(SecUploadFileParamVO secUploadFileParam);
 
     @Mapping(target = "parentId", expression = "java(com.disk.base.utils.IdUtil.decrypt(fileUploadParam.getParentId()))")

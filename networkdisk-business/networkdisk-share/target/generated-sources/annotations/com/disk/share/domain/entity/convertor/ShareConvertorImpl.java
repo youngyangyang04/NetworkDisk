@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-28T19:19:51+0800",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260101-2150, environment: Java 21.0.9 (Eclipse Adoptium)"
+    date = "2026-02-28T16:22:21+0800",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)"
 )
 @Component
 public class ShareConvertorImpl implements ShareConvertor {
@@ -41,14 +41,14 @@ public class ShareConvertorImpl implements ShareConvertor {
 
         CreateShareContext createShareContext = new CreateShareContext();
 
-        if ( createShareParam.getShareDayType() != null ) {
-            createShareContext.setShareDayType( createShareParam.getShareDayType() );
-        }
         if ( createShareParam.getShareName() != null ) {
             createShareContext.setShareName( createShareParam.getShareName() );
         }
         if ( createShareParam.getShareType() != null ) {
             createShareContext.setShareType( createShareParam.getShareType() );
+        }
+        if ( createShareParam.getShareDayType() != null ) {
+            createShareContext.setShareDayType( createShareParam.getShareDayType() );
         }
 
         createShareContext.setShareFileIds( createShareParam.getShareFileIds() == null ? null : createShareParam.getShareFileIds().stream().map(com.disk.base.utils.IdUtil::decrypt).toList() );
@@ -67,35 +67,35 @@ public class ShareConvertorImpl implements ShareConvertor {
         if ( shareDO.getGmtCreate() != null ) {
             userShareInfoVO.setCreateTime( shareDO.getGmtCreate() );
         }
-        if ( shareDO.getCreateUser() != null ) {
-            userShareInfoVO.setCreateUser( shareDO.getCreateUser() );
-        }
         if ( shareDO.getId() != null ) {
             userShareInfoVO.setId( shareDO.getId() );
-        }
-        if ( shareDO.getShareCode() != null ) {
-            userShareInfoVO.setShareCode( shareDO.getShareCode() );
-        }
-        if ( shareDO.getShareDay() != null ) {
-            userShareInfoVO.setShareDay( shareDO.getShareDay() );
-        }
-        if ( shareDO.getShareDayType() != null ) {
-            userShareInfoVO.setShareDayType( shareDO.getShareDayType() );
-        }
-        if ( shareDO.getShareEndTime() != null ) {
-            userShareInfoVO.setShareEndTime( shareDO.getShareEndTime() );
         }
         if ( shareDO.getShareName() != null ) {
             userShareInfoVO.setShareName( shareDO.getShareName() );
         }
-        if ( shareDO.getShareStatus() != null ) {
-            userShareInfoVO.setShareStatus( shareDO.getShareStatus() );
-        }
         if ( shareDO.getShareType() != null ) {
             userShareInfoVO.setShareType( shareDO.getShareType() );
         }
+        if ( shareDO.getShareDayType() != null ) {
+            userShareInfoVO.setShareDayType( shareDO.getShareDayType() );
+        }
+        if ( shareDO.getShareDay() != null ) {
+            userShareInfoVO.setShareDay( shareDO.getShareDay() );
+        }
+        if ( shareDO.getShareEndTime() != null ) {
+            userShareInfoVO.setShareEndTime( shareDO.getShareEndTime() );
+        }
         if ( shareDO.getShareUrl() != null ) {
             userShareInfoVO.setShareUrl( shareDO.getShareUrl() );
+        }
+        if ( shareDO.getShareCode() != null ) {
+            userShareInfoVO.setShareCode( shareDO.getShareCode() );
+        }
+        if ( shareDO.getShareStatus() != null ) {
+            userShareInfoVO.setShareStatus( shareDO.getShareStatus() );
+        }
+        if ( shareDO.getCreateUser() != null ) {
+            userShareInfoVO.setCreateUser( shareDO.getCreateUser() );
         }
 
         return userShareInfoVO;

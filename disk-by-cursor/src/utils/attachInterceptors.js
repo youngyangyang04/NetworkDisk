@@ -6,6 +6,18 @@ export function attachInterceptors(instance, label = '') {
   instance.interceptors.request.use(
     (config) => {
       if (!config.headers) config.headers = {}
+      const method = (config.method || 'get').toLowerCase()
+
+      // 避免 GET 请求命中浏览器缓存，导致页面切换后数据不刷新
+      if (method === 'get') {
+        config.params = {
+          ...(config.params || {}),
+          _t: Date.now()
+        }
+        config.headers['Cache-Control'] = 'no-cache'
+        config.headers.Pragma = 'no-cache'
+      }
+
       const userStore = useUserStore()
       if (userStore.token) {
         config.headers.Authorization = `${userStore.token}`
@@ -65,6 +77,13 @@ export function attachInterceptors(instance, label = '') {
           console.log(`[${label}] 响应成功，返回数据:`, response.data)
           return response.data
         } else {
+          const isSecUploadNotExists =
+            response.config?.url?.includes('/file/sec-upload') &&
+            response.data.code === 'FILE_NOT_EXIT'
+          if (isSecUploadNotExists) {
+            // 秒传未命中是正常流程，交给上层继续走分片上传
+            return response.data
+          }
           console.log(`[${label}] 响应失败:`, response.data.message)
           ElMessage.error(response.data.message || '请求失败')
           return Promise.reject(new Error(response.data.message || '请求失败'))

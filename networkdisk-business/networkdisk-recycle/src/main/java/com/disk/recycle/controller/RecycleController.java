@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 类描述: TODO
  *
@@ -28,18 +30,35 @@ public class RecycleController {
         return Result.success(recycleService.list(userId));
     }
 
-    @GetMapping("/recycle/restore")
+    @PutMapping("/recycle/restore")
     public Result<Boolean> restore(@Validated @RequestBody RestoreFileParamVO restoreFileParam) {
         Long userId = UserIdUtil.get();
-        recycleService.restore(userId, restoreFileParam.getFileIds().stream().map(IdUtil::decrypt).toList());
+        recycleService.restore(userId, parseFileIds(restoreFileParam.getFileIds()));
         return Result.success(true);
     }
 
     @DeleteMapping("/recycle")
     public Result<Boolean> delete(@Validated @RequestBody DeleteFileParamVO deleteFileParam) {
         Long userId = UserIdUtil.get();
-        recycleService.hardDelete(userId, deleteFileParam.getFileIds().stream().map(IdUtil::decrypt).toList());
+        recycleService.hardDelete(userId, parseFileIds(deleteFileParam.getFileIds()));
         return Result.success(true);
+    }
+
+    /**
+     * 兼容两种 ID 传参：
+     * 1. 明文 long（回收站当前实现）
+     * 2. 加密字符串（兼容历史前端或其他调用方）
+     */
+    private List<Long> parseFileIds(List<String> fileIds) {
+        return fileIds.stream().map(this::parseFileId).toList();
+    }
+
+    private Long parseFileId(String fileId) {
+        try {
+            return Long.valueOf(fileId);
+        } catch (NumberFormatException ignore) {
+            return IdUtil.decrypt(fileId);
+        }
     }
 
     @Autowired

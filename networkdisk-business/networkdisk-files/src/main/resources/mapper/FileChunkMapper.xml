@@ -21,4 +21,23 @@
         id,identifier,real_path,
         chunk_number,expiration_time,create_user,gmt_create
     </sql>
+
+    <delete id="deleteByIdsPhysical">
+        delete from file_chunk
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteDeletedOrExpiredByUniqueKey">
+        delete from file_chunk
+        where identifier = #{identifier}
+          and chunk_number = #{chunkNumber}
+          and create_user = #{createUser}
+          and (
+              deleted != 0
+              or expiration_time &lt;= #{now}
+          )
+    </delete>
 </mapper>

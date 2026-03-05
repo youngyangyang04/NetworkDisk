@@ -7,8 +7,6 @@ const shareRequest = axios.create({
 })
 attachInterceptors(shareRequest, 'shareRequest')
 
-
-// 获取分享列表
 export function getShareList() {
   return shareRequest({
     url: '/list',
@@ -16,7 +14,6 @@ export function getShareList() {
   })
 }
 
-// 创建分享
 export function createShare(data) {
   return shareRequest({
     url: '/share',
@@ -25,7 +22,6 @@ export function createShare(data) {
   })
 }
 
-// 取消分享
 export function cancelShare(data) {
   return shareRequest({
     url: '/share',
@@ -34,7 +30,6 @@ export function cancelShare(data) {
   })
 }
 
-// 获取分享详情
 export function getShareDetail(shareId) {
   return shareRequest({
     url: '/share',
@@ -43,7 +38,6 @@ export function getShareDetail(shareId) {
   })
 }
 
-// 获取分享简单详情
 export function getShareSimpleDetail(params) {
   return shareRequest({
     url: '/share/simple',
@@ -52,7 +46,6 @@ export function getShareSimpleDetail(params) {
   })
 }
 
-// 校验分享码
 export function checkShareCode(data) {
   return shareRequest({
     url: '/share/code/check',
@@ -61,3 +54,19 @@ export function checkShareCode(data) {
   })
 }
 
+export function getShareFiles(params) {
+  return shareRequest({
+    url: '/share/files',
+    method: 'get',
+    params
+  })
+}
+
+export function downloadShareFile(params) {
+  return shareRequest({
+    url: '/share/file/download',
+    method: 'get',
+    params,
+    responseType: 'blob'
+  })
+}

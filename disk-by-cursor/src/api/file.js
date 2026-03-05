@@ -7,6 +7,14 @@ const fileRequest = axios.create({
 })
 attachInterceptors(fileRequest, 'fileRequest')
 
+// 首页概览
+export function getHomeOverview() {
+  return fileRequest({
+    url: '/home/overview',
+    method: 'get'
+  })
+}
+
 // 获取文件列表
 export function getFileList(params) {
   return fileRequest({
@@ -91,11 +99,11 @@ export function previewFile(params) {
 }
 
 // 搜索文件
-export function searchFiles(params) {
+export function searchFiles(data) {
   return fileRequest({
     url: '/file/search',
-    method: 'get',
-    params
+    method: 'post',
+    data
   })
 }
 

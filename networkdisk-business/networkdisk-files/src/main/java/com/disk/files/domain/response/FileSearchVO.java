@@ -40,6 +40,11 @@ public class FileSearchVO {
     private String filename;
 
     /**
+     * 高亮后的文件名称（可选）
+     */
+    private String highlightFilename;
+
+    /**
      * 文件大小描述
      */
     private String fileSizeDesc;

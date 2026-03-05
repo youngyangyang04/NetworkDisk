@@ -12,7 +12,7 @@
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
@@ -24,7 +24,7 @@
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
@@ -36,7 +36,7 @@
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
@@ -49,7 +49,7 @@
         </el-card>
       </el-col>
     </el-row>
-    
+
     <el-row :gutter="12" style="margin-top: 12px;">
       <el-col :span="12">
         <el-card>
@@ -62,13 +62,17 @@
             <el-empty description="暂无最近上传的文件" />
           </div>
           <el-table v-else :data="recentFiles" style="width: 100%">
-            <el-table-column prop="filename" label="文件名" />
-            <el-table-column prop="fileSizeDesc" label="大小" width="60" />
-            <el-table-column prop="updateTime" label="上传时间" width="120" />
+            <el-table-column prop="filename" label="文件名" min-width="200" />
+            <el-table-column prop="fileSizeDesc" label="大小" width="100" />
+            <el-table-column label="上传时间" width="180">
+              <template #default="{ row }">
+                <span>{{ formatDateTime(row.updateTime) }}</span>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </el-col>
-      
+
       <el-col :span="12">
         <el-card>
           <template #header>
@@ -80,11 +84,13 @@
             <el-empty description="暂无分享文件" />
           </div>
           <el-table v-else :data="recentShares" style="width: 100%">
-            <el-table-column prop="shareName" label="分享名称" min-width="200">
+            <el-table-column prop="shareName" label="分享名称" min-width="220">
               <template #default="{ row }">
-                <div class="share-row-container" 
-                     @mouseenter="showOperation(row, $event)" 
-                     @mouseleave="hiddenOperation(row, $event)">
+                <div
+                  class="share-row-container"
+                  @mouseenter="showOperation($event)"
+                  @mouseleave="hiddenOperation($event)"
+                >
                   <div class="share-name-content">
                     <el-icon class="share-icon" color="#409eff">
                       <Share />
@@ -92,20 +98,24 @@
                     <span class="share-name">{{ row.shareName }}</span>
                   </div>
                   <div class="share-operation-content">
-                    <el-tooltip class="item" effect="light" content="复制链接" placement="top">
-                      <el-button 
-                        icon="CopyDocument" 
-                        type="primary" 
-                        size="small" 
-                        circle 
-                        @click="copyShareUrl(row)">
-                      </el-button>
+                    <el-tooltip effect="light" content="复制链接" placement="top">
+                      <el-button
+                        :icon="CopyDocument"
+                        type="primary"
+                        size="small"
+                        circle
+                        @click="copyShareUrl(row)"
+                      />
                     </el-tooltip>
                   </div>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="shareEndTime" label="过期时间" width="150" />
+            <el-table-column label="过期时间" width="180">
+              <template #default="{ row }">
+                <span>{{ formatDateTime(row.shareEndTime, '永久有效') }}</span>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </el-col>
@@ -114,52 +124,120 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Share, CopyDocument } from '@element-plus/icons-vue'
+import { CopyDocument, Document, Folder, Picture, Share, VideoPlay } from '@element-plus/icons-vue'
+import { getHomeOverview } from '@/api/file'
+import { getShareList } from '@/api/share'
+import { useRoute } from 'vue-router'
 
-// mock统计数据
 const stats = ref({
-  totalFiles: 123,
-  images: 45,
-  videos: 12,
-  documents: 66
+  totalFiles: 0,
+  images: 0,
+  videos: 0,
+  documents: 0
 })
 
-// mock最近上传
-const recentFiles = ref([
-  { filename: '设计文档.pdf', fileSizeDesc: '2.3MB', updateTime: '2024-07-01 10:23:00' },
-  { filename: '产品原型.png', fileSizeDesc: '1.1MB', updateTime: '2024-06-30 18:12:00' },
-  { filename: '会议记录.docx', fileSizeDesc: '800KB', updateTime: '2024-06-29 09:00:00' },
-  { filename: '视频演示.mp4', fileSizeDesc: '15MB', updateTime: '2024-06-28 14:45:00' },
-  { filename: '数据表.xlsx', fileSizeDesc: '500KB', updateTime: '2024-06-27 16:20:00' }
-])
+const recentFiles = ref([])
+const recentShares = ref([])
+const route = useRoute()
 
-// mock最近分享
-const recentShares = ref([
-  { shareName: '项目资料包', shareEndTime: '2024-08-01 23:59:59', shareUrl: 'https://disk.example.com/share/abc123' },
-  { shareName: '设计图纸', shareEndTime: '2024-07-20 23:59:59', shareUrl: 'https://disk.example.com/share/def456' }
-])
+const toNumber = (value) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
 
-const copyShareUrl = (share) => {
-  navigator.clipboard.writeText(share.shareUrl).then(() => {
-    ElMessage.success('分享链接已复制到剪贴板')
-  }).catch(() => {
-    ElMessage.error('复制失败')
+const parseDate = (value) => {
+  if (!value) return null
+  if (value instanceof Date) return value
+  const date = new Date(value)
+  if (!Number.isNaN(date.getTime())) return date
+  return null
+}
+
+const formatDateTime = (value, emptyText = '--') => {
+  const date = parseDate(value)
+  if (!date) return emptyText
+  return date.toLocaleString('zh-CN')
+}
+
+const sortByRecent = (items) => {
+  return [...items].sort((a, b) => {
+    const left = parseDate(a.createTime || a.gmtCreate || a.shareEndTime)?.getTime() || 0
+    const right = parseDate(b.createTime || b.gmtCreate || b.shareEndTime)?.getTime() || 0
+    return right - left
   })
 }
 
-// 显示操作按钮
-const showOperation = (row, event) => {
-  const container = event.currentTarget
-  container.classList.add('show')
+const loadOverview = async () => {
+  const response = await getHomeOverview()
+  if (response.code !== 'SUCCESS') {
+    throw new Error(response.message || '加载首页概览失败')
+  }
+  const data = response.data || {}
+  stats.value = {
+    totalFiles: toNumber(data.totalFiles),
+    images: toNumber(data.images),
+    videos: toNumber(data.videos),
+    documents: toNumber(data.documents)
+  }
+  recentFiles.value = Array.isArray(data.recentFiles) ? data.recentFiles : []
 }
 
-// 隐藏操作按钮
-const hiddenOperation = (row, event) => {
-  const container = event.currentTarget
-  container.classList.remove('show')
+const loadShares = async () => {
+  const response = await getShareList()
+  if (response.code !== 'SUCCESS') {
+    throw new Error(response.message || '加载分享列表失败')
+  }
+  const list = Array.isArray(response.data) ? response.data : []
+  recentShares.value = sortByRecent(list).slice(0, 5)
 }
+
+const loadHomeData = async () => {
+  const [overviewResult, shareResult] = await Promise.allSettled([loadOverview(), loadShares()])
+  if (overviewResult.status === 'rejected') {
+    console.error('加载首页概览失败:', overviewResult.reason)
+    ElMessage.error('加载首页概览失败')
+  }
+  if (shareResult.status === 'rejected') {
+    console.error('加载分享数据失败:', shareResult.reason)
+    ElMessage.error('加载分享数据失败')
+  }
+}
+
+const copyShareUrl = async (share) => {
+  if (!share?.shareUrl) {
+    ElMessage.warning('当前分享没有可复制的链接')
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(share.shareUrl)
+    ElMessage.success('分享链接已复制到剪贴板')
+  } catch (error) {
+    ElMessage.error('复制失败')
+  }
+}
+
+const showOperation = (event) => {
+  event.currentTarget.classList.add('show')
+}
+
+const hiddenOperation = (event) => {
+  event.currentTarget.classList.remove('show')
+}
+
+onMounted(() => {
+  loadHomeData()
+})
+
+watch(
+  () => route.fullPath,
+  (newPath) => {
+    if (newPath === '/') {
+      loadHomeData()
+    }
+  }
+)
 </script>
 
 <style scoped>
@@ -196,7 +274,7 @@ const hiddenOperation = (row, event) => {
 
 .stat-number {
   font-size: 28px;
-  font-weight: bold;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 4px;
 }
@@ -248,7 +326,6 @@ const hiddenOperation = (row, event) => {
   padding: 6px 0;
 }
 
-/* 分享行样式 */
 .share-row-container {
   position: relative;
   display: flex;
@@ -275,7 +352,7 @@ const hiddenOperation = (row, event) => {
 
 .share-operation-content {
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
   margin-left: 8px;
 }
 
@@ -283,84 +360,52 @@ const hiddenOperation = (row, event) => {
   opacity: 1;
 }
 
-/* 响应式设计 */
 @media (max-width: 1200px) {
-  .stat-card {
-    margin-bottom: 12px;
-  }
-  
   .stat-content {
     padding: 12px;
   }
-  
+
   .stat-icon {
     font-size: 36px;
     margin-right: 12px;
   }
-  
+
   .stat-number {
     font-size: 24px;
-  }
-  
-  :deep(.el-table th),
-  :deep(.el-table td) {
-    padding: 6px 0;
   }
 }
 
 @media (max-width: 992px) {
-  .stat-card {
-    margin-bottom: 8px;
-  }
-  
   .stat-content {
     padding: 8px;
   }
-  
+
   .stat-icon {
     font-size: 32px;
     margin-right: 8px;
   }
-  
+
   .stat-number {
     font-size: 20px;
-  }
-  
-  .stat-label {
-    font-size: 12px;
-  }
-  
-  :deep(.el-table th),
-  :deep(.el-table td) {
-    padding: 4px 0;
   }
 }
 
 @media (max-width: 768px) {
-  .stat-card {
-    margin-bottom: 8px;
-  }
-  
   .stat-content {
     padding: 8px;
   }
-  
+
   .stat-icon {
     font-size: 28px;
     margin-right: 8px;
   }
-  
+
   .stat-number {
     font-size: 18px;
   }
-  
+
   .stat-label {
-    font-size: 11px;
-  }
-  
-  :deep(.el-table th),
-  :deep(.el-table td) {
-    padding: 4px 0;
+    font-size: 12px;
   }
 }
-</style> 
+</style>

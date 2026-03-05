@@ -36,6 +36,7 @@ import com.disk.files.domain.response.BreadcrumbVO;
 import com.disk.files.domain.response.FileChunkUploadVO;
 import com.disk.files.domain.response.FileSearchVO;
 import com.disk.files.domain.response.FolderTreeNodeVO;
+import com.disk.files.domain.response.HomeOverviewVO;
 import com.disk.files.domain.response.UploadedChunkListVO;
 import com.disk.files.domain.response.UserFileVO;
 import com.disk.files.domain.service.UserFileService;
@@ -79,6 +80,11 @@ public class UserFileController {
     
     @Autowired
     private FileConvertor fileConvertor;
+
+    @GetMapping("/home/overview")
+    public Result<HomeOverviewVO> homeOverview() {
+        return Result.success(userFileService.getHomeOverview(UserIdUtil.get()));
+    }
 
 
     /**

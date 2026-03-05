@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.mybatis.spring.annotation.MapperScan;
 
 @EnableDubbo
-@SpringBootApplication(scanBasePackages = {"com.disk.recycle"})
+@SpringBootApplication(scanBasePackages = {"com.disk"})
 public class NetworkdiskRecycleApplication {
 
     public static void main(String[] args) {

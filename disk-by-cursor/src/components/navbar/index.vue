@@ -117,7 +117,9 @@ const handleChange = (name) => {
       if (current.name !== 'Home') router.push({ name: 'Home' })
       break
     case 'Files':
-      if (current.name !== 'Files') router.push({ name: 'Files' })
+      if (current.name !== 'Files' || current.query.type) {
+        router.push({ name: 'Files', query: {} })
+      }
       break
     case 'Imgs':
       if (!(current.name === 'Files' && current.query.type === 'image')) {
@@ -148,14 +150,34 @@ const handleChange = (name) => {
   }
 }
 
-// 根据路由名称更新navbar状态
+// 根据路由和筛选参数更新导航高亮状态
 const updateNavbarByRoute = () => {
-  let name = route.name
-  change(name)
+  if (route.name === 'Files') {
+    const type = route.query.type
+    if (type === 'image') {
+      change('Imgs')
+      return
+    }
+    if (type === 'document') {
+      change('Docs')
+      return
+    }
+    if (type === 'video') {
+      change('Videos')
+      return
+    }
+    if (type === 'music') {
+      change('Musics')
+      return
+    }
+    change('Files')
+    return
+  }
+  change(route.name)
 }
 
 // 监听路由变化
-watch(() => route.name, () => {
+watch([() => route.name, () => route.query.type], () => {
   updateNavbarByRoute()
 }, { immediate: false })
 

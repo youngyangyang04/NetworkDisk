@@ -29,6 +29,20 @@
           </div>
           
           <div class="toolbar-right">
+        <el-input
+          v-model="searchKeyword"
+          class="search-input"
+          placeholder="搜索文件名（回车搜索）"
+          clearable
+          @keyup.enter="handleSearch"
+        >
+          <template #append>
+            <el-button :loading="searchLoading" @click="handleSearch">
+              <el-icon><Search /></el-icon>
+            </el-button>
+          </template>
+        </el-input>
+        <el-button v-if="isSearchMode" @click="clearSearch">清空搜索</el-button>
         <el-button 
           v-if="selectedFiles.length > 0" 
           type="danger" 
@@ -80,22 +94,30 @@
               <div @click="clickFilename(scope.row)" class="file-name-content">
                 <i :class="getFileFontElement(scope.row.fileType)"
                    style="margin-right: 15px; font-size: 20px; cursor: pointer;"/>
-                <span style="cursor:pointer;">{{ scope.row.filename }}</span>
+                <span
+                  v-if="isSearchMode && scope.row.highlightFilename"
+                  style="cursor:pointer;"
+                  v-html="scope.row.highlightFilename"
+                ></span>
+                <span v-else style="cursor:pointer;">{{ scope.row.filename }}</span>
               </div>
               <div class="file-operation-content">
                 <div class="pan-file-operations">
+                  <el-tooltip v-if="!scope.row.folderFlag" class="item" effect="light" content="预览" placement="top">
+                    <el-button icon="View" type="primary" size="small" circle @click.stop="previewFile(scope.row)"></el-button>
+                  </el-tooltip>
                   <!-- 只有文件类型才显示下载按钮 -->
                   <el-tooltip v-if="!scope.row.folderFlag" class="item" effect="light" content="下载" placement="top">
-                    <el-button icon="Download" type="info" size="small" circle @click="downloadFile(scope.row)"></el-button>
+                    <el-button icon="Download" type="info" size="small" circle @click.stop="downloadFile(scope.row)"></el-button>
                   </el-tooltip>
                   <el-tooltip class="item" effect="light" content="重命名" placement="top">
-                    <el-button icon="Edit" type="warning" size="small" circle @click="renameFile(scope.row)"></el-button>
+                    <el-button icon="Edit" type="warning" size="small" circle @click.stop="renameFile(scope.row)"></el-button>
                   </el-tooltip>
                   <el-tooltip class="item" effect="light" content="删除" placement="top">
-                    <el-button icon="Delete" type="danger" size="small" circle @click="deleteFile(scope.row)"></el-button>
+                    <el-button icon="Delete" type="danger" size="small" circle @click.stop="deleteFile(scope.row)"></el-button>
                   </el-tooltip>
                   <el-tooltip class="item" effect="light" content="分享" placement="top">
-                    <el-button icon="Share" type="success" size="small" circle @click="shareFile(scope.row)"></el-button>
+                    <el-button icon="Share" type="success" size="small" circle @click.stop="shareFile(scope.row)"></el-button>
                   </el-tooltip>
                 </div>
               </div>
@@ -179,7 +201,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
@@ -188,13 +210,15 @@ import {
   FolderAdd, 
   Delete, 
   Download, 
+  Search,
   Edit, 
+  View,
   Share,
   House
 } from '@element-plus/icons-vue'
 import { useFileStore } from '@/stores/file'
 import { useUserStore } from '@/stores/user'
-import { renameFile as renameFileAPI, deleteFiles as deleteFilesAPI, createFolder as createFolderAPI } from '@/api/file'
+import { renameFile as renameFileAPI, deleteFiles as deleteFilesAPI, createFolder as createFolderAPI, downloadFile as downloadFileAPI, previewFile as previewFileAPI, searchFiles } from '@/api/file'
 import { createShare } from '@/api/share'
 
 import UploadButton from '@/components/UploadButton.vue'
@@ -209,6 +233,9 @@ const showShareDialog = ref(false)
 const currentShareFile = ref(null)
 const selectedFiles = ref([])
 const tableHeight = ref(window.innerHeight - 300)
+const searchKeyword = ref('')
+const searchLoading = ref(false)
+const isSearchMode = ref(false)
 
 // 分享表单数据
 const shareForm = ref({
@@ -247,6 +274,8 @@ watch([() => route.query.type, () => userStore.rootFileId], ([newType, rootFileI
   if (!rootFileId) {
     return
   }
+  isSearchMode.value = false
+  searchKeyword.value = ''
   const fileTypes = newType ? typeMap[newType] || '-1' : typeMap.all
   loading.value = true
   fileStore.loadFiles(rootFileId, fileTypes).finally(() => loading.value = false)
@@ -263,7 +292,8 @@ function openFolder(folder) {
     ElMessage.error('文件夹ID无效')
     return
   }
-  
+  isSearchMode.value = false
+
   loading.value = true
   fileStore.loadFiles(folder.id, fileStore.fileTypes)
     .catch((error) => {
@@ -277,10 +307,52 @@ function openFolder(folder) {
 
 // 面包屑导航
 function navigateToFolder(folderId) {
+  isSearchMode.value = false
   loading.value = true
   // 如果是根目录（空字符串），使用用户根目录ID
   const targetFolderId = folderId === '' ? userStore.rootFileId : folderId
   fileStore.loadFiles(targetFolderId, fileStore.fileTypes).finally(() => loading.value = false)
+}
+
+async function handleSearch() {
+  const keyword = searchKeyword.value?.trim()
+  if (!keyword) {
+    await clearSearch()
+    return
+  }
+  searchLoading.value = true
+  loading.value = true
+  try {
+    const response = await searchFiles({
+      keyword,
+      fileTypes: fileStore.fileTypes
+    })
+    if (response?.success) {
+      fileStore.files = response.data || []
+      selectedFiles.value = []
+      isSearchMode.value = true
+    }
+  } catch (error) {
+    console.error('[Files.vue] 搜索失败:', error)
+    ElMessage.error(error?.message || '搜索失败')
+  } finally {
+    searchLoading.value = false
+    loading.value = false
+  }
+}
+
+async function clearSearch() {
+  if (!isSearchMode.value && !searchKeyword.value) {
+    return
+  }
+  searchKeyword.value = ''
+  isSearchMode.value = false
+  loading.value = true
+  try {
+    await fileStore.loadFiles(fileStore.parentId, fileStore.fileTypes)
+  } finally {
+    loading.value = false
+  }
 }
 
 // 文件图标
@@ -331,16 +403,41 @@ function clickFilename(file) {
   if (file.folderFlag) {
     openFolder(file)
   } else {
-    // 根据文件类型进行预览或下载
-    downloadFile(file)
+    if (canInlinePreview(file?.fileType)) {
+      previewFile(file)
+    } else {
+      downloadFile(file)
+    }
+  }
+}
+
+// 预览文件
+async function previewFile(file) {
+  try {
+    if (file.folderFlag) {
+      ElMessage.warning('文件夹暂不支持预览')
+      return
+    }
+    await previewSingleFile(file)
+  } catch (error) {
+    console.error('[Files.vue] 预览失败:', error)
+    ElMessage.error(error?.message || '文件预览失败')
   }
 }
 
 // 下载文件
-function downloadFile(file) {
-  console.log('[Files.vue] 下载文件:', file)
-  // TODO: 实现下载逻辑
-  ElMessage.info('下载功能开发中...')
+async function downloadFile(file) {
+  try {
+    if (file.folderFlag) {
+      ElMessage.warning('文件夹暂不支持下载')
+      return
+    }
+    await downloadSingleFile(file)
+    ElMessage.success('文件下载已开始')
+  } catch (error) {
+    console.error('[Files.vue] 下载失败:', error)
+    ElMessage.error(error?.message || '文件下载失败')
+  }
 }
 
 // 重命名文件
@@ -521,12 +618,192 @@ async function confirmShare() {
 }
 
 // 批量下载
-function batchDownload() {
+async function batchDownload() {
   if (selectedFiles.value.length === 0) {
     ElMessage.warning('请选择要下载的文件')
     return
   }
-  ElMessage.info('批量下载功能开发中...')
+
+  const targetFiles = selectedFiles.value.filter(file => !file.folderFlag)
+  if (targetFiles.length === 0) {
+    ElMessage.warning('选中的都是文件夹，无法下载')
+    return
+  }
+
+  let successCount = 0
+  for (const file of targetFiles) {
+    try {
+      await downloadSingleFile(file)
+      successCount++
+    } catch (error) {
+      console.error('[Files.vue] 批量下载单文件失败:', file, error)
+    }
+  }
+
+  if (successCount === 0) {
+    ElMessage.error('批量下载失败')
+    return
+  }
+  ElMessage.success(`批量下载完成，成功 ${successCount}/${targetFiles.length}`)
+}
+
+function getFileId(file) {
+  return file?.id || file?.fileId || file?.file_id || ''
+}
+
+function canInlinePreview(fileType) {
+  const previewableTypes = [5, 6, 7, 8, 9, 11, 12]
+  return previewableTypes.includes(Number(fileType))
+}
+
+function isTextPreviewType(fileType) {
+  const textTypes = [6, 11, 12]
+  return textTypes.includes(Number(fileType))
+}
+
+function getPreviewMimeType(fileType) {
+  const type = Number(fileType)
+  if (type === 5) return 'application/pdf'
+  if (type === 6 || type === 11 || type === 12) return 'text/plain;charset=utf-8'
+  if (type === 7) return 'image/*'
+  if (type === 8) return 'audio/*'
+  if (type === 9) return 'video/*'
+  return 'application/octet-stream'
+}
+
+function parseFilenameFromDisposition(disposition, fallbackName = 'download') {
+  if (!disposition) return fallbackName
+  const utf8Match = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i)
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1])
+    } catch (_) {
+      return utf8Match[1]
+    }
+  }
+  const normalMatch = disposition.match(/filename\s*=\s*"?([^\";]+)"?/i)
+  if (normalMatch?.[1]) {
+    return normalMatch[1]
+  }
+  return fallbackName
+}
+
+function saveBlobToLocal(blob, filename) {
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
+}
+
+async function extractBlobFromResponse(response, defaultErrorMessage) {
+  const blob = response?.data instanceof Blob ? response.data : response
+  if (!(blob instanceof Blob)) {
+    throw new Error(defaultErrorMessage)
+  }
+  if (blob.type && blob.type.includes('application/json')) {
+    const text = await blob.text()
+    try {
+      const result = JSON.parse(text)
+      throw new Error(result?.message || defaultErrorMessage)
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error(defaultErrorMessage)
+      }
+      throw error
+    }
+  }
+  return blob
+}
+
+function escapeHtml(rawText = '') {
+  return rawText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+async function decodeTextBlob(blob) {
+  const bytes = await blob.arrayBuffer()
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  } catch (_) {
+    try {
+      return new TextDecoder('gb18030').decode(bytes)
+    } catch (_) {
+      return new TextDecoder().decode(bytes)
+    }
+  }
+}
+
+function renderTextPreview(previewWindow, text, filename) {
+  const safeTitle = escapeHtml(filename || '文本预览')
+  const safeText = escapeHtml(text)
+  previewWindow.document.open()
+  previewWindow.document.write(`<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${safeTitle}</title>
+  <style>
+    body { margin: 0; background: #f7f8fa; color: #1f2329; font-family: Consolas, Monaco, Menlo, monospace; }
+    .wrap { padding: 16px; }
+    pre { margin: 0; white-space: pre-wrap; word-break: break-word; line-height: 1.6; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap"><pre>${safeText}</pre></div>
+</body>
+</html>`)
+  previewWindow.document.close()
+}
+
+async function previewSingleFile(file) {
+  const fileId = getFileId(file)
+  if (!fileId) {
+    throw new Error('文件ID无效')
+  }
+  const previewWindow = window.open('', '_blank')
+  if (!previewWindow) {
+    throw new Error('浏览器拦截了预览窗口，请允许弹窗后重试')
+  }
+  try {
+    const response = await previewFileAPI({ fileId: fileId.toString() })
+    const rawBlob = await extractBlobFromResponse(response, '文件预览失败')
+    if (isTextPreviewType(file?.fileType)) {
+      const decodedText = await decodeTextBlob(rawBlob)
+      renderTextPreview(previewWindow, decodedText, file?.filename)
+      return
+    }
+    const previewType = rawBlob.type || getPreviewMimeType(file?.fileType)
+    const previewBlob = rawBlob.type ? rawBlob : new Blob([rawBlob], { type: previewType })
+    const previewUrl = window.URL.createObjectURL(previewBlob)
+    previewWindow.location.href = previewUrl
+    setTimeout(() => window.URL.revokeObjectURL(previewUrl), 60000)
+  } catch (error) {
+    previewWindow.close()
+    throw error
+  }
+}
+
+async function downloadSingleFile(file) {
+  const fileId = getFileId(file)
+  if (!fileId) {
+    throw new Error('文件ID无效')
+  }
+
+  const response = await downloadFileAPI({ fileId: fileId.toString() })
+  const blob = await extractBlobFromResponse(response, '文件下载失败')
+
+  const disposition = response?.headers?.['content-disposition'] || response?.headers?.['Content-Disposition']
+  const filename = parseFilenameFromDisposition(disposition, file?.filename || 'download')
+  saveBlobToLocal(blob, filename)
 }
 
 // 批量删除
@@ -576,11 +853,6 @@ function formatDate(dateString) {
   })
 }
 
-onMounted(() => {
-  console.log('[Files.vue] 组件挂载')
-  loading.value = true
-  fileStore.initRoot().finally(() => loading.value = false)
-})
 </script>
 
 <style scoped>
@@ -641,6 +913,11 @@ onMounted(() => {
 .toolbar-right {
   display: flex;
   gap: 12px;
+  align-items: center;
+}
+
+.search-input {
+  width: 320px;
 }
 
 
@@ -787,6 +1064,14 @@ onMounted(() => {
   flex: 1;
   display: flex;
   align-items: center;
+}
+
+:deep(.search-highlight) {
+  background: #fff3bf;
+  color: #ad6800;
+  border-radius: 2px;
+  padding: 0 2px;
+  font-weight: 600;
 }
 
 .file-operation-content {

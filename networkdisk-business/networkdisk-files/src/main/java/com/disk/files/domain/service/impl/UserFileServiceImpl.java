@@ -39,6 +39,8 @@ import com.disk.files.infrastructure.es.entity.UserFileESEntity;
 import com.disk.files.domain.response.BreadcrumbVO;
 import com.disk.files.domain.response.FileSearchVO;
 import com.disk.files.domain.response.FolderTreeNodeVO;
+import com.disk.files.domain.response.HomeOverviewVO;
+import com.disk.files.domain.response.UserFileVO;
 import com.disk.files.domain.service.FileChunkService;
 import com.disk.files.domain.service.FileService;
 import com.disk.files.domain.service.UserFileService;
@@ -61,8 +63,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -87,6 +93,18 @@ import static com.disk.files.exception.FilesErrorCode.TARGET_FOLDER_TYPE_ERROR;
  */
 @Service
 public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO> implements UserFileService {
+
+    private static final int HOME_RECENT_FILE_LIMIT = 5;
+
+    private static final List<Integer> HOME_DOCUMENT_FILE_TYPES = List.of(
+            FileTypeEnum.EXCEL_FILE.getCode(),
+            FileTypeEnum.WORD_FILE.getCode(),
+            FileTypeEnum.PDF_FILE.getCode(),
+            FileTypeEnum.TXT_FILE.getCode(),
+            FileTypeEnum.POWER_POINT_FILE.getCode(),
+            FileTypeEnum.SOURCE_CODE_FILE.getCode(),
+            FileTypeEnum.CSV_FILE.getCode()
+    );
 
     @Autowired
     private FileConvertor fileConvertor;
@@ -180,6 +198,9 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
 
     @Override
     public boolean secUpload(SecUploadFileContext context) {
+        if (Objects.isNull(context.getUserId())) {
+            throw new SystemException("秒传失败：用户ID不能为空");
+        }
         List<FileDO> fileList = getFilesByUserIdAndIdentifier(context.getUserId(), context.getIdentifier());
         if (EmptyUtil.isEmpty(fileList)) {
             return false;
@@ -359,11 +380,32 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
 
     @Override
     public List<FileSearchVO> search(FileSearchContext context) {
+        List<String> searchTerms = buildSearchTerms(context.getKeyword());
         List<FileSearchVO> result;
         if (fileEsMapper != null) {
             // 优先走 ES
             LambdaEsQueryWrapper<UserFileESEntity> wrapper = new LambdaEsQueryWrapper<>();
-            wrapper.like(UserFileESEntity::getFilename, context.getKeyword());
+            if (CollectionUtils.isNotEmpty(searchTerms)) {
+                wrapper.and(w -> {
+                    boolean first = true;
+                    for (String term : searchTerms) {
+                        if (StringUtils.isBlank(term)) {
+                            continue;
+                        }
+                        if (first) {
+                            w.like(UserFileESEntity::getFilename, term);
+                            first = false;
+                        } else {
+                            w.or().like(UserFileESEntity::getFilename, term);
+                        }
+                    }
+                    if (first) {
+                        w.like(UserFileESEntity::getFilename, context.getKeyword());
+                    }
+                });
+            } else {
+                wrapper.like(UserFileESEntity::getFilename, context.getKeyword());
+            }
             wrapper.eq(UserFileESEntity::getUserId, context.getUserId());
             wrapper.eq(UserFileESEntity::getDeleted, com.disk.base.enums.DeleteEnum.NO.getCode());
             if (!EmptyUtil.isEmpty(context.getFileTypeArray())) {
@@ -379,13 +421,30 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
                 vo.setFolderFlag(doc.getFolderFlag());
                 vo.setFileType(doc.getFileType());
                 vo.setFileSizeDesc(doc.getFileSizeDesc());
+                vo.setUpdateTime(doc.getGmtModified());
                 return vo;
             }).toList();
+            if (CollectionUtils.isEmpty(result)) {
+                // ES 数据未同步时回退 MySQL，保证搜索可用
+                result = doSearch(context, searchTerms);
+            }
         } else {
             // 回退 MySQL
-            result = doSearch(context);
+            result = doSearch(context, searchTerms);
         }
         fillParentFilename(result);
+        applyHighlight(result, searchTerms);
+        return result;
+    }
+
+    @Override
+    public HomeOverviewVO getHomeOverview(Long userId) {
+        HomeOverviewVO result = new HomeOverviewVO();
+        result.setTotalFiles(countUserFilesByFileTypes(userId, null));
+        result.setImages(countUserFilesByFileTypes(userId, List.of(FileTypeEnum.IMAGE_FILE.getCode())));
+        result.setVideos(countUserFilesByFileTypes(userId, List.of(FileTypeEnum.VIDEO_FILE.getCode())));
+        result.setDocuments(countUserFilesByFileTypes(userId, HOME_DOCUMENT_FILE_TYPES));
+        result.setRecentFiles(listHomeRecentFiles(userId, HOME_RECENT_FILE_LIMIT));
         return result;
     }
 
@@ -668,7 +727,7 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
         if (EmptyUtil.isEmpty(record)) {
             throw new FileException(FILE_NOT_EXIT);
         }
-        if (Objects.equals(record.getUserId(), userId)) {
+        if (!Objects.equals(record.getUserId(), userId)) {
             throw new FileException(FILE_NO_AUTH);
         }
     }
@@ -728,13 +787,12 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
      * @param realFileRecord
      */
     private void addDownloadAttribute(HttpServletResponse response, UserFileDO record, FileDO realFileRecord) {
-        try {
-            response.addHeader(FileConstant.CONTENT_DISPOSITION_STR,
-                    FileConstant.CONTENT_DISPOSITION_VALUE_PREFIX_STR + new String(record.getFilename().getBytes(FileConstant.GB2312_STR), FileConstant.IOS_8859_1_STR));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            throw new SystemException(FILE_NOT_EXIT);
-        }
+        String encodedFilename = URLEncoder.encode(record.getFilename(), StandardCharsets.UTF_8)
+                .replace("+", "%20");
+        response.setHeader(
+                FileConstant.CONTENT_DISPOSITION_STR,
+                "attachment;filename=\"" + encodedFilename + "\";filename*=UTF-8''" + encodedFilename
+        );
         response.setContentLengthLong(Long.parseLong(realFileRecord.getFileSize()));
     }
 
@@ -770,7 +828,11 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
         if (EmptyUtil.isEmpty(realFileRecord)) {
             throw new SystemException("当前的文件记录不存在");
         }
-        addCommonResponseHeader(response, realFileRecord.getFilePreviewContentType());
+        String previewContentType = StringUtils.defaultIfBlank(
+                realFileRecord.getFilePreviewContentType(),
+                MediaType.APPLICATION_OCTET_STREAM_VALUE
+        );
+        addCommonResponseHeader(response, previewContentType);
         realFile2OutputStream(realFileRecord.getRealPath(), response);
     }
 
@@ -909,9 +971,45 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
      * @param context
      * @return
      */
-    private List<FileSearchVO> doSearch(FileSearchContext context) {
-        List<UserFileDO> userFileDOList = baseMapper.searchFile(context);
-        return fileConvertor.mapToSearchVo(userFileDOList);
+    private List<FileSearchVO> doSearch(FileSearchContext context, List<String> searchTerms) {
+        QueryWrapper<UserFileDO> queryWrapper = Wrappers.query();
+        queryWrapper.select("id", "parent_id", "filename", "file_size_desc", "folder_flag", "file_type", "gmt_modified");
+        queryWrapper.eq("user_id", context.getUserId());
+        queryWrapper.eq("deleted", DeleteEnum.NO.getCode());
+        if (CollectionUtils.isNotEmpty(context.getFileTypeArray())) {
+            queryWrapper.in("file_type", context.getFileTypeArray());
+        }
+        queryWrapper.and(wrapper -> {
+            boolean first = true;
+            for (String term : searchTerms) {
+                if (StringUtils.isBlank(term)) {
+                    continue;
+                }
+                if (first) {
+                    wrapper.like("filename", term);
+                    first = false;
+                } else {
+                    wrapper.or().like("filename", term);
+                }
+            }
+            if (first) {
+                wrapper.like("filename", context.getKeyword());
+            }
+        });
+        queryWrapper.orderByDesc("gmt_modified");
+
+        List<UserFileDO> records = list(queryWrapper);
+        return records.stream().map(record -> {
+            FileSearchVO vo = new FileSearchVO();
+            vo.setFileId(record.getId());
+            vo.setParentId(record.getParentId());
+            vo.setFilename(record.getFilename());
+            vo.setFolderFlag(record.getFolderFlag());
+            vo.setFileType(record.getFileType());
+            vo.setFileSizeDesc(record.getFileSizeDesc());
+            vo.setUpdateTime(record.getGmtModified());
+            return vo;
+        }).toList();
     }
 
     /**
@@ -927,5 +1025,150 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
         List<UserFileDO> parentRecords = listByIds(parentIdList);
         Map<Long, String> fileId2filenameMap = parentRecords.stream().collect(Collectors.toMap(UserFileDO::getId, UserFileDO::getFilename));
         result.forEach(vo -> vo.setParentFilename(fileId2filenameMap.get(vo.getParentId())));
+    }
+
+    private Long countUserFilesByFileTypes(Long userId, List<Integer> fileTypes) {
+        QueryWrapper<UserFileDO> queryWrapper = Wrappers.query();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("deleted", DeleteEnum.NO.getCode());
+        queryWrapper.eq("folder_flag", FolderFlagEnum.NO.getCode());
+        if (CollectionUtils.isNotEmpty(fileTypes)) {
+            queryWrapper.in("file_type", fileTypes);
+        }
+        return count(queryWrapper);
+    }
+
+    private List<UserFileVO> listHomeRecentFiles(Long userId, int limit) {
+        QueryWrapper<UserFileDO> queryWrapper = Wrappers.query();
+        queryWrapper.select("id", "parent_id", "filename", "file_size_desc", "folder_flag", "file_type", "gmt_modified");
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("deleted", DeleteEnum.NO.getCode());
+        queryWrapper.eq("folder_flag", FolderFlagEnum.NO.getCode());
+        queryWrapper.orderByDesc("gmt_modified");
+        queryWrapper.last("limit " + limit);
+        List<UserFileDO> records = list(queryWrapper);
+        return records.stream().map(this::toUserFileVO).toList();
+    }
+
+    private UserFileVO toUserFileVO(UserFileDO record) {
+        UserFileVO vo = new UserFileVO();
+        vo.setId(record.getId());
+        vo.setParentId(record.getParentId());
+        vo.setFilename(record.getFilename());
+        vo.setFileSizeDesc(record.getFileSizeDesc());
+        vo.setFolderFlag(record.getFolderFlag());
+        vo.setFileType(record.getFileType());
+        vo.setUpdateTime(record.getGmtModified());
+        return vo;
+    }
+
+    private List<String> buildSearchTerms(String keyword) {
+        String normalized = StringUtils.trimToEmpty(keyword);
+        if (StringUtils.isBlank(normalized)) {
+            return List.of();
+        }
+
+        LinkedHashSet<String> terms = new LinkedHashSet<>();
+        terms.add(normalized);
+        for (String token : normalized.split("\\s+")) {
+            if (StringUtils.isNotBlank(token)) {
+                terms.add(token.trim());
+            }
+        }
+
+        String chineseOnly = normalized.replaceAll("[^\\u4e00-\\u9fa5]", StringUtils.EMPTY);
+        if (chineseOnly.length() > 2) {
+            for (int i = 0; i <= chineseOnly.length() - 2; i++) {
+                terms.add(chineseOnly.substring(i, i + 2));
+            }
+            for (int i = 0; i <= chineseOnly.length() - 3; i++) {
+                terms.add(chineseOnly.substring(i, i + 3));
+            }
+        }
+        return terms.stream()
+                .filter(StringUtils::isNotBlank)
+                .sorted(Comparator.comparingInt(String::length).reversed())
+                .toList();
+    }
+
+    private void applyHighlight(List<FileSearchVO> result, List<String> searchTerms) {
+        if (CollectionUtils.isEmpty(result) || CollectionUtils.isEmpty(searchTerms)) {
+            return;
+        }
+        result.forEach(item -> item.setHighlightFilename(buildHighlightFilename(item.getFilename(), searchTerms)));
+    }
+
+    private String buildHighlightFilename(String filename, List<String> searchTerms) {
+        if (StringUtils.isBlank(filename) || CollectionUtils.isEmpty(searchTerms)) {
+            return null;
+        }
+
+        List<int[]> ranges = new ArrayList<>();
+        for (String term : searchTerms) {
+            if (StringUtils.isBlank(term)) {
+                continue;
+            }
+            int from = 0;
+            while (from < filename.length()) {
+                int index = StringUtils.indexOfIgnoreCase(filename, term, from);
+                if (index < 0) {
+                    break;
+                }
+                ranges.add(new int[]{index, index + term.length()});
+                from = index + term.length();
+            }
+        }
+        if (ranges.isEmpty()) {
+            return null;
+        }
+
+        ranges.sort((left, right) -> {
+            if (left[0] != right[0]) {
+                return Integer.compare(left[0], right[0]);
+            }
+            return Integer.compare(right[1], left[1]);
+        });
+
+        List<int[]> merged = new ArrayList<>();
+        for (int[] current : ranges) {
+            if (merged.isEmpty()) {
+                merged.add(new int[]{current[0], current[1]});
+                continue;
+            }
+            int[] last = merged.get(merged.size() - 1);
+            if (current[0] <= last[1]) {
+                last[1] = Math.max(last[1], current[1]);
+            } else {
+                merged.add(new int[]{current[0], current[1]});
+            }
+        }
+
+        StringBuilder builder = new StringBuilder();
+        int cursor = 0;
+        for (int[] range : merged) {
+            if (range[0] > cursor) {
+                builder.append(escapeHtml(filename.substring(cursor, range[0])));
+            }
+            builder.append("<span class=\"search-highlight\">")
+                    .append(escapeHtml(filename.substring(range[0], range[1])))
+                    .append("</span>");
+            cursor = range[1];
+        }
+        if (cursor < filename.length()) {
+            builder.append(escapeHtml(filename.substring(cursor)));
+        }
+        return builder.toString();
+    }
+
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return StringUtils.EMPTY;
+        }
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 }

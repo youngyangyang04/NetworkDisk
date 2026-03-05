@@ -70,8 +70,8 @@ public class UserFileESEntity {
     private String updateUser;
 
     /** 删除标志（0=正常，1=已删除） */
-    @IndexField(fieldType = FieldType.BOOLEAN, value = "deleted")
-    private Boolean deleted;
+    @IndexField(fieldType = FieldType.INTEGER, value = "deleted")
+    private Integer deleted;
 
     /** 乐观锁版本号 */
     @IndexField(fieldType = FieldType.INTEGER, value = "lock_version")

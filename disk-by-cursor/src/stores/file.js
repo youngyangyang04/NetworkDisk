@@ -9,9 +9,11 @@ export const useFileStore = defineStore('file', () => {
   const fileTypes = ref('-1')
   const files = ref([])
   const breadcrumbs = ref([])
+  const latestLoadSeq = ref(0)
 
   // 支持传fileTypes参数
   async function loadFiles(newParentId, newFileTypes) {
+    const currentSeq = ++latestLoadSeq.value
     if (typeof newFileTypes !== 'undefined') fileTypes.value = newFileTypes
     if (typeof newParentId !== 'undefined') {
       parentId.value = newParentId
@@ -21,14 +23,17 @@ export const useFileStore = defineStore('file', () => {
     
     try {
       const res = await getFileList({ parentId: parentId.value, fileTypes: fileTypes.value })
+      if (currentSeq !== latestLoadSeq.value) return
       console.log('[fileStore] 文件列表API响应:', res)
       files.value = res.data || []
       
       if (parentId.value) {
         const bcRes = await getBreadcrumbs({ fileId: parentId.value })
+        if (currentSeq !== latestLoadSeq.value) return
         console.log('[fileStore] 面包屑API响应:', bcRes)
         breadcrumbs.value = bcRes.data || []
       } else {
+        if (currentSeq !== latestLoadSeq.value) return
         breadcrumbs.value = []
       }
       

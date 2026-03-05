@@ -37,10 +37,10 @@
               <div class="file-operation-content">
                 <div class="pan-file-operations">
                   <el-tooltip class="item" effect="light" content="还原" placement="top">
-                    <el-button icon="RefreshLeft" type="success" size="small" circle @click="restoreFile(row)"></el-button>
+                    <el-button icon="RefreshLeft" type="success" size="small" circle @click.stop="restoreFile(row)"></el-button>
                   </el-tooltip>
                   <el-tooltip class="item" effect="light" content="彻底删除" placement="top">
-                    <el-button icon="Delete" type="danger" size="small" circle @click="deleteFile(row)"></el-button>
+                    <el-button icon="Delete" type="danger" size="small" circle @click.stop="deleteFile(row)"></el-button>
                   </el-tooltip>
                 </div>
               </div>
@@ -49,7 +49,11 @@
         </el-table-column>
         
         <el-table-column prop="fileSizeDesc" label="大小" width="100" />
-        <el-table-column prop="updateTime" label="删除时间" width="180" />
+        <el-table-column label="删除时间" width="180">
+          <template #default="{ row }">
+            {{ formatDateTime(row.gmtModified) }}
+          </template>
+        </el-table-column>
         
 
       </el-table>
@@ -75,11 +79,13 @@ const loadRecycleList = async () => {
   loading.value = true
   try {
     const response = await getRecycleList()
-    if (response.code === 200) {
+    if (response?.success) {
       recycleList.value = response.data || []
+      selectedFiles.value = []
     }
   } catch (error) {
     console.error('加载回收站列表失败:', error)
+    ElMessage.error(error?.message || '加载回收站列表失败')
   } finally {
     loading.value = false
   }
@@ -87,6 +93,13 @@ const loadRecycleList = async () => {
 
 const handleSelectionChange = (selection) => {
   selectedFiles.value = selection
+}
+
+const formatDateTime = (value) => {
+  if (!value) return '--'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString('zh-CN')
 }
 
 // 显示操作按钮
@@ -151,7 +164,7 @@ const restoreFile = async (file) => {
       type: 'warning'
     })
     
-    await restoreFiles({ fileIds: file.fileId })
+    await restoreFiles({ fileIds: [String(file.id)] })
     ElMessage.success('还原成功')
     loadRecycleList()
   } catch (error) {
@@ -169,7 +182,7 @@ const deleteFile = async (file) => {
       type: 'warning'
     })
     
-    await deleteRecycleFiles({ fileIds: file.fileId })
+    await deleteRecycleFiles({ fileIds: [String(file.id)] })
     ElMessage.success('删除成功')
     loadRecycleList()
   } catch (error) {
@@ -192,7 +205,7 @@ const batchRestore = async () => {
       type: 'warning'
     })
     
-    const fileIds = selectedFiles.value.map(f => f.fileId).join(',')
+    const fileIds = selectedFiles.value.map(f => String(f.id))
     await restoreFiles({ fileIds })
     ElMessage.success('批量还原成功')
     loadRecycleList()
@@ -216,7 +229,7 @@ const batchDelete = async () => {
       type: 'warning'
     })
     
-    const fileIds = selectedFiles.value.map(f => f.fileId).join(',')
+    const fileIds = selectedFiles.value.map(f => String(f.id))
     await deleteRecycleFiles({ fileIds })
     ElMessage.success('批量删除成功')
     loadRecycleList()

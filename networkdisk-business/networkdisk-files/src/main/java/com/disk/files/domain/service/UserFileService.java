@@ -21,6 +21,7 @@ import com.disk.files.domain.entity.UserFileDO;
 import com.disk.files.domain.response.BreadcrumbVO;
 import com.disk.files.domain.response.FileSearchVO;
 import com.disk.files.domain.response.FolderTreeNodeVO;
+import com.disk.files.domain.response.HomeOverviewVO;
 import com.disk.files.infrastructure.enums.FolderFlagEnum;
 
 import java.util.List;
@@ -127,6 +128,14 @@ public interface UserFileService extends IService<UserFileDO> {
      * @return
      */
     List<FileSearchVO> search(FileSearchContext context);
+
+    /**
+     * 首页概览
+     *
+     * @param userId 用户ID
+     * @return 首页概览数据
+     */
+    HomeOverviewVO getHomeOverview(Long userId);
 
     /**
      * 获取用户根文件信息

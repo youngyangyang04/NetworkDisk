@@ -142,53 +142,62 @@ CREATE TABLE `share` (
 -- ----------------------------
 DROP TABLE IF EXISTS `share_file`;
 CREATE TABLE `share_file` (
-                              `id` bigint NOT NULL COMMENT '主键',
-                              `share_id` bigint NOT NULL COMMENT '分享id',
-                              `file_id` bigint NOT NULL COMMENT '文件记录ID（user_file.id）',
-                              `create_user` bigint NOT NULL COMMENT '分享创建人',
-                              `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                              `gmt_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-                              `deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除，非0已删除',
-                              `lock_version` int NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+                              `id`              bigint      NOT NULL                                                        COMMENT '主键',
+                              `share_id`        bigint      NOT NULL                                                        COMMENT '分享id',
+                              `file_id`         bigint      NOT NULL                                                        COMMENT '文件记录ID（user_file.id）',
+                              `create_user`     bigint      NOT NULL                                                        COMMENT '分享创建人',
+                              `gmt_create`      datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP                              COMMENT '创建时间',
+                              `gmt_modified`    datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  COMMENT '最后更新时间',
+                              `deleted`         int         NOT NULL DEFAULT 0                                              COMMENT '逻辑删除：0未删除，非0已删除',
+                              `lock_version`    int         NOT NULL DEFAULT 0                                              COMMENT '乐观锁版本号',
                               PRIMARY KEY (`id`) USING BTREE,
                               UNIQUE KEY `uk_share_id_file_id` (`share_id`, `file_id`) USING BTREE COMMENT '分享ID、文件ID联合唯一',
                               KEY `idx_share_id_deleted` (`share_id`, `deleted`) USING BTREE,
                               KEY `idx_file_id` (`file_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户分享文件表' ROW_FORMAT=DYNAMIC;
+)   ENGINE=InnoDB
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_bin COMMENT='用户分享文件表'
+    ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 -- Table structure for user_search_history
 -- ----------------------------
 DROP TABLE IF EXISTS `user_search_history`;
 CREATE TABLE `user_search_history` (
-                                       `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
-                                       `user_id` bigint NOT NULL COMMENT '用户id',
-                                       `search_content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '搜索文案',
-                                       `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                       `gmt_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-                                       `deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除，非0已删除',
-                                       `lock_version` int NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+                                       `id`             bigint                                                  NOT NULL AUTO_INCREMENT                                         COMMENT '主键',
+                                       `user_id`        bigint                                                  NOT NULL                                                        COMMENT '用户id',
+                                       `search_content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NOT NULL DEFAULT ''                                             COMMENT '搜索文案',
+                                       `gmt_create`     datetime                                                NOT NULL DEFAULT CURRENT_TIMESTAMP                              COMMENT '创建时间',
+                                       `gmt_modified`   datetime                                                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  COMMENT '最后更新时间',
+                                       `deleted`        int                                                     NOT NULL DEFAULT 0                                              COMMENT '逻辑删除：0未删除，非0已删除',
+                                       `lock_version`   int                                                     NOT NULL DEFAULT 0                                              COMMENT '乐观锁版本号',
                                        PRIMARY KEY (`id`) USING BTREE,
                                        UNIQUE KEY `uk_user_id_search_content` (`user_id`, `search_content`) USING BTREE COMMENT '用户id+搜索内容唯一',
                                        KEY `idx_user_modified` (`user_id`, `gmt_modified`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户搜索历史表' ROW_FORMAT=DYNAMIC;
+)   ENGINE=InnoDB
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_bin COMMENT='用户搜索历史表'
+    ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 -- Table structure for error_log
 -- ----------------------------
 DROP TABLE IF EXISTS `error_log`;
 CREATE TABLE `error_log` (
-                             `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
-                             `log_content` varchar(900) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '日志内容',
-                             `log_status` tinyint NOT NULL DEFAULT 0 COMMENT '日志状态：0未处理 1已处理',
-                             `create_user` bigint NOT NULL COMMENT '创建人',
-                             `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                             `gmt_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-                             `update_user` bigint NOT NULL DEFAULT 0 COMMENT '更新人',
-                             `deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删除，非0已删除',
-                             `lock_version` int NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+                             `id`           bigint                                                  NOT NULL AUTO_INCREMENT                                         COMMENT '主键',
+                             `log_content`  varchar(900) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NOT NULL DEFAULT ''                                             COMMENT '日志内容',
+                             `log_status`   tinyint                                                 NOT NULL DEFAULT 0                                              COMMENT '日志状态：0未处理 1已处理',
+                             `create_user`  bigint                                                  NOT NULL                                                        COMMENT '创建人',
+                             `gmt_create`   datetime                                                NOT NULL DEFAULT CURRENT_TIMESTAMP                              COMMENT '创建时间',
+                             `gmt_modified` datetime                                                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  COMMENT '最后更新时间',
+                             `update_user`  bigint                                                  NOT NULL DEFAULT 0                                              COMMENT '更新人',
+                             `deleted`      int                                                     NOT NULL DEFAULT 0                                              COMMENT '逻辑删除：0未删除，非0已删除',
+                             `lock_version` int                                                     NOT NULL DEFAULT 0                                              COMMENT '乐观锁版本号',
                              PRIMARY KEY (`id`) USING BTREE,
                              KEY `idx_log_status_deleted` (`log_status`, `deleted`, `gmt_create`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='错误日志表' ROW_FORMAT=DYNAMIC;
+)   ENGINE=InnoDB
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_bin COMMENT='错误日志表'
+    ROW_FORMAT=DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

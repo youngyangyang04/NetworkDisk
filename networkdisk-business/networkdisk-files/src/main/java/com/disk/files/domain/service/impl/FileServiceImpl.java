@@ -123,7 +123,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, FileDO> implements 
         }
 
         List<Long> fileChunkRecordIdList = chunkRecoredList.stream().map(FileChunkDO::getId).collect(Collectors.toList());
-        fileChunkService.removeByIds(fileChunkRecordIdList);
+        fileChunkService.removeChunkRecordsPhysically(fileChunkRecordIdList);
     }
 
     /**
