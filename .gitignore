@@ -1,2 +1,5 @@
 *.idea
-*.target/
+*.target/target/
+*/target/
+*.log
+.idea/
