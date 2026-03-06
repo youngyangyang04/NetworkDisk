@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+﻿import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -12,16 +12,17 @@ const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 
-// 注册所有图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
-// 初始化用户信息，保证 token 和登录状态同步
 const userStore = useUserStore()
-await userStore.initUserInfo()
 
-app.use(router)
-app.use(ElementPlus)
+async function bootstrap() {
+  await userStore.initUserInfo()
+  app.use(router)
+  app.use(ElementPlus)
+  app.mount('#app')
+}
 
-app.mount('#app') 
+bootstrap()
