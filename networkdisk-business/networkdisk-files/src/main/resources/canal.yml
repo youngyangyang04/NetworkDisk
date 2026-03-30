@@ -1,0 +1,12 @@
+com:
+  disk:
+    canal:
+      enable: true
+      host: 127.0.0.1
+      port: 11111
+      destination: example
+      username:
+      password:
+      batch-size: 200
+      polling-interval-ms: 500
+      subscribe-filter: network_disk\\.user_file
