@@ -6,8 +6,8 @@ import javax.annotation.processing.Generated;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-05T19:32:23+0800",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)"
+    date = "2026-03-30T13:11:12+0800",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260128-0750, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 public class UserConvertorImpl implements UserConvertor {
 
@@ -46,11 +46,11 @@ public class UserConvertorImpl implements UserConvertor {
         if ( request.getUserId() != null ) {
             userDO.setId( request.getUserId() );
         }
-        if ( request.getNickName() != null ) {
-            userDO.setNickName( request.getNickName() );
-        }
         if ( request.getEmail() != null ) {
             userDO.setEmail( request.getEmail() );
+        }
+        if ( request.getNickName() != null ) {
+            userDO.setNickName( request.getNickName() );
         }
         if ( request.getProfilePhotoUrl() != null ) {
             userDO.setProfilePhotoUrl( request.getProfilePhotoUrl() );

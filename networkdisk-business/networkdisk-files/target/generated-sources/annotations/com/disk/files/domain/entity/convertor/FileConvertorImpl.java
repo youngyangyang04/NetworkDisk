@@ -32,8 +32,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-05T19:32:19+0800",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)"
+    date = "2026-03-30T13:11:06+0800",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260128-0750, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class FileConvertorImpl implements FileConvertor {
@@ -144,6 +144,9 @@ public class FileConvertorImpl implements FileConvertor {
 
         UploadFileContext uploadFileContext = new UploadFileContext();
 
+        if ( fileUploadParam.getFile() != null ) {
+            uploadFileContext.setFile( fileUploadParam.getFile() );
+        }
         if ( fileUploadParam.getFilename() != null ) {
             uploadFileContext.setFilename( fileUploadParam.getFilename() );
         }
@@ -152,9 +155,6 @@ public class FileConvertorImpl implements FileConvertor {
         }
         if ( fileUploadParam.getTotalSize() != null ) {
             uploadFileContext.setTotalSize( fileUploadParam.getTotalSize() );
-        }
-        if ( fileUploadParam.getFile() != null ) {
-            uploadFileContext.setFile( fileUploadParam.getFile() );
         }
 
         uploadFileContext.setParentId( com.disk.base.utils.IdUtil.decrypt(fileUploadParam.getParentId()) );
@@ -171,6 +171,9 @@ public class FileConvertorImpl implements FileConvertor {
 
         SaveFileContext saveFileContext = new SaveFileContext();
 
+        if ( context.getFile() != null ) {
+            saveFileContext.setFile( context.getFile() );
+        }
         if ( context.getFilename() != null ) {
             saveFileContext.setFilename( context.getFilename() );
         }
@@ -179,9 +182,6 @@ public class FileConvertorImpl implements FileConvertor {
         }
         if ( context.getTotalSize() != null ) {
             saveFileContext.setTotalSize( context.getTotalSize() );
-        }
-        if ( context.getFile() != null ) {
-            saveFileContext.setFile( context.getFile() );
         }
         if ( context.getUserId() != null ) {
             saveFileContext.setUserId( context.getUserId() );
@@ -198,6 +198,15 @@ public class FileConvertorImpl implements FileConvertor {
 
         FileChunkUploadContext fileChunkUploadContext = new FileChunkUploadContext();
 
+        if ( fileChunkUpload.getChunkNumber() != null ) {
+            fileChunkUploadContext.setChunkNumber( fileChunkUpload.getChunkNumber() );
+        }
+        if ( fileChunkUpload.getCurrentChunkSize() != null ) {
+            fileChunkUploadContext.setCurrentChunkSize( fileChunkUpload.getCurrentChunkSize() );
+        }
+        if ( fileChunkUpload.getFile() != null ) {
+            fileChunkUploadContext.setFile( fileChunkUpload.getFile() );
+        }
         if ( fileChunkUpload.getFilename() != null ) {
             fileChunkUploadContext.setFilename( fileChunkUpload.getFilename() );
         }
@@ -207,17 +216,8 @@ public class FileConvertorImpl implements FileConvertor {
         if ( fileChunkUpload.getTotalChunks() != null ) {
             fileChunkUploadContext.setTotalChunks( fileChunkUpload.getTotalChunks() );
         }
-        if ( fileChunkUpload.getChunkNumber() != null ) {
-            fileChunkUploadContext.setChunkNumber( fileChunkUpload.getChunkNumber() );
-        }
-        if ( fileChunkUpload.getCurrentChunkSize() != null ) {
-            fileChunkUploadContext.setCurrentChunkSize( fileChunkUpload.getCurrentChunkSize() );
-        }
         if ( fileChunkUpload.getTotalSize() != null ) {
             fileChunkUploadContext.setTotalSize( fileChunkUpload.getTotalSize() );
-        }
-        if ( fileChunkUpload.getFile() != null ) {
-            fileChunkUploadContext.setFile( fileChunkUpload.getFile() );
         }
 
         fileChunkUploadContext.setUserId( com.disk.base.utils.UserIdUtil.get() );
@@ -233,6 +233,15 @@ public class FileConvertorImpl implements FileConvertor {
 
         FileChunkSaveContext fileChunkSaveContext = new FileChunkSaveContext();
 
+        if ( context.getChunkNumber() != null ) {
+            fileChunkSaveContext.setChunkNumber( context.getChunkNumber() );
+        }
+        if ( context.getCurrentChunkSize() != null ) {
+            fileChunkSaveContext.setCurrentChunkSize( context.getCurrentChunkSize() );
+        }
+        if ( context.getFile() != null ) {
+            fileChunkSaveContext.setFile( context.getFile() );
+        }
         if ( context.getFilename() != null ) {
             fileChunkSaveContext.setFilename( context.getFilename() );
         }
@@ -242,17 +251,8 @@ public class FileConvertorImpl implements FileConvertor {
         if ( context.getTotalChunks() != null ) {
             fileChunkSaveContext.setTotalChunks( context.getTotalChunks() );
         }
-        if ( context.getChunkNumber() != null ) {
-            fileChunkSaveContext.setChunkNumber( context.getChunkNumber() );
-        }
-        if ( context.getCurrentChunkSize() != null ) {
-            fileChunkSaveContext.setCurrentChunkSize( context.getCurrentChunkSize() );
-        }
         if ( context.getTotalSize() != null ) {
             fileChunkSaveContext.setTotalSize( context.getTotalSize() );
-        }
-        if ( context.getFile() != null ) {
-            fileChunkSaveContext.setFile( context.getFile() );
         }
         if ( context.getUserId() != null ) {
             fileChunkSaveContext.setUserId( context.getUserId() );
@@ -366,23 +366,23 @@ public class FileConvertorImpl implements FileConvertor {
 
         UserFileVO userFileVO = new UserFileVO();
 
+        if ( record.getFileSizeDesc() != null ) {
+            userFileVO.setFileSizeDesc( record.getFileSizeDesc() );
+        }
+        if ( record.getFileType() != null ) {
+            userFileVO.setFileType( record.getFileType() );
+        }
+        if ( record.getFilename() != null ) {
+            userFileVO.setFilename( record.getFilename() );
+        }
+        if ( record.getFolderFlag() != null ) {
+            userFileVO.setFolderFlag( record.getFolderFlag() );
+        }
         if ( record.getId() != null ) {
             userFileVO.setId( record.getId() );
         }
         if ( record.getParentId() != null ) {
             userFileVO.setParentId( record.getParentId() );
-        }
-        if ( record.getFilename() != null ) {
-            userFileVO.setFilename( record.getFilename() );
-        }
-        if ( record.getFileSizeDesc() != null ) {
-            userFileVO.setFileSizeDesc( record.getFileSizeDesc() );
-        }
-        if ( record.getFolderFlag() != null ) {
-            userFileVO.setFolderFlag( record.getFolderFlag() );
-        }
-        if ( record.getFileType() != null ) {
-            userFileVO.setFileType( record.getFileType() );
         }
 
         return userFileVO;
@@ -402,17 +402,17 @@ public class FileConvertorImpl implements FileConvertor {
         if ( context.getIdentifier() != null ) {
             fileChunkMergeAndSaveContext.setIdentifier( context.getIdentifier() );
         }
-        if ( context.getTotalSize() != null ) {
-            fileChunkMergeAndSaveContext.setTotalSize( context.getTotalSize() );
-        }
         if ( context.getParentId() != null ) {
             fileChunkMergeAndSaveContext.setParentId( context.getParentId() );
         }
-        if ( context.getUserId() != null ) {
-            fileChunkMergeAndSaveContext.setUserId( context.getUserId() );
-        }
         if ( context.getRecord() != null ) {
             fileChunkMergeAndSaveContext.setRecord( context.getRecord() );
+        }
+        if ( context.getTotalSize() != null ) {
+            fileChunkMergeAndSaveContext.setTotalSize( context.getTotalSize() );
+        }
+        if ( context.getUserId() != null ) {
+            fileChunkMergeAndSaveContext.setUserId( context.getUserId() );
         }
 
         return fileChunkMergeAndSaveContext;
@@ -467,20 +467,20 @@ public class FileConvertorImpl implements FileConvertor {
 
         FileSearchVO fileSearchVO = new FileSearchVO();
 
-        if ( userFileDO.getParentId() != null ) {
-            fileSearchVO.setParentId( userFileDO.getParentId() );
+        if ( userFileDO.getFileSizeDesc() != null ) {
+            fileSearchVO.setFileSizeDesc( userFileDO.getFileSizeDesc() );
+        }
+        if ( userFileDO.getFileType() != null ) {
+            fileSearchVO.setFileType( userFileDO.getFileType() );
         }
         if ( userFileDO.getFilename() != null ) {
             fileSearchVO.setFilename( userFileDO.getFilename() );
         }
-        if ( userFileDO.getFileSizeDesc() != null ) {
-            fileSearchVO.setFileSizeDesc( userFileDO.getFileSizeDesc() );
-        }
         if ( userFileDO.getFolderFlag() != null ) {
             fileSearchVO.setFolderFlag( userFileDO.getFolderFlag() );
         }
-        if ( userFileDO.getFileType() != null ) {
-            fileSearchVO.setFileType( userFileDO.getFileType() );
+        if ( userFileDO.getParentId() != null ) {
+            fileSearchVO.setParentId( userFileDO.getParentId() );
         }
 
         return fileSearchVO;

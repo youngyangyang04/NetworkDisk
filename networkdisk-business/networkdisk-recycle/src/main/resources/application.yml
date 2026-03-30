@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: @application.name@
+  config:
+    import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml
+
+server:
+  port: 8084
