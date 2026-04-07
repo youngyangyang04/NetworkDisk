@@ -4,6 +4,7 @@ import com.aliyun.oss.OSSClient;
 import com.disk.base.exception.SystemException;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Data
 @Component
+@ConditionalOnProperty(prefix = "com.disk.file.storage.engine.oss", name = "endpoint")
 @ConfigurationProperties(prefix = "com.disk.file.storage.engine.oss")
 public class OssStorageEngineConfig {
 

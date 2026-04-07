@@ -37,6 +37,7 @@ import lombok.ToString;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
  * @author weikunkun
  */
 @Component
+@ConditionalOnBean(OSSClient.class)
 public class OssStorageEngine extends AbstractStorageEngine {
 
     private static final Integer TEN_THOUSAND_INT = 10000;

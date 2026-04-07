@@ -5,6 +5,7 @@ import com.disk.base.exception.SystemException;
 import com.disk.file.config.OssStorageEngineConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@ConditionalOnBean(OSSClient.class)
 public class OssBucketInitializer implements CommandLineRunner {
 
     @Autowired

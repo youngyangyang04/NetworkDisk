@@ -31,6 +31,7 @@
         <module>networkdisk-notice</module>
         <module>networkdisk-recycle</module>
         <module>networkdisk-engine</module>
+        <module>networkdisk-ai</module>
     </modules>
 
 </project>

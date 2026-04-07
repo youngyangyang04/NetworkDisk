@@ -22,5 +22,9 @@ spring:
           uri: lb://networkdisk-business
           predicates:
             - Path=/trade/**,/order/**,/user/**,/collection/**,/wxPay/**,/box/**
+        - id: networkdisk-ai
+          uri: lb://networkdisk-ai
+          predicates:
+            - Path=/api/v1/ai/**
 server:
   port: 8081

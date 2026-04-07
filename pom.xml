@@ -160,6 +160,12 @@
 
             <dependency>
                 <groupId>com.disk</groupId>
+                <artifactId>networkdisk-ai</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.disk</groupId>
                 <artifactId>networkdisk-api</artifactId>
                 <version>${project.version}</version>
             </dependency>

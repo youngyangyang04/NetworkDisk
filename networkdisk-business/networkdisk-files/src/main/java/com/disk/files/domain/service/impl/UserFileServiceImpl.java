@@ -45,6 +45,7 @@ import com.disk.files.domain.service.FileChunkService;
 import com.disk.files.domain.service.FileService;
 import com.disk.files.domain.service.UserFileService;
 import com.disk.files.exception.FileException;
+import com.disk.files.infrastructure.ai.DocumentAiInitializer;
 import com.disk.files.infrastructure.constant.FileConstant;
 import com.disk.files.infrastructure.enums.FileTypeEnum;
 import com.disk.files.infrastructure.enums.FolderFlagEnum;
@@ -122,6 +123,9 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
 
     @Autowired
     private UserFileESMapper fileEsMapper;
+
+    @Autowired
+    private DocumentAiInitializer documentAiInitializer;
 
 
     @Override
@@ -591,6 +595,9 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFileDO>
         handleDuplicateFilename(entity);
         if (!save((entity))) {
             throw new SystemException("保存文件信息失败");
+        }
+        if (FolderFlagEnum.NO.equals(folderFlagEnum)) {
+            documentAiInitializer.scheduleInitialize(userId, entity.getId(), filename);
         }
         return entity.getId();
     }

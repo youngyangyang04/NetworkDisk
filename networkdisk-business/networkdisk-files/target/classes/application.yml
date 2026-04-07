@@ -2,7 +2,13 @@ spring:
   application:
     name: networkdisk-files
   config:
-    import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml,classpath:es.yml,classpath:canal.yml
+    import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml,classpath:es.yml,classpath:canal.yml,classpath:stream.yml
+  cloud:
+    stream:
+      bindings:
+        aiWarmup-out-0:
+          destination: ai-document-warmup
+          content-type: application/json
   servlet:
     multipart:
       max-file-size: 4096MB

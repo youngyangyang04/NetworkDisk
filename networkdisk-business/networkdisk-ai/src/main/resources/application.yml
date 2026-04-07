@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: @application.name@
+  config:
+    import: classpath:datasource.yml,classpath:cache.yml,classpath:rpc.yml,classpath:stream.yml
+  cloud:
+    function:
+      definition: aiWarmupConsumer
+    stream:
+      bindings:
+        aiWarmupConsumer-in-0:
+          destination: ai-document-warmup
+          group: networkdisk-ai
+          content-type: application/json
+
+server:
+  port: 8087
+
+com:
+  disk:
+    ai:
+      provider:
+        type: openai-compatible
+        base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+        api-key: sk-xxx  # 输入你的api-key
+        chat-path: /chat/completions
+        embeddings-path: /embeddings
+        chat-model: qwen3.5-plus
+        embedding-model: qwen3-vl-embedding
+        embedding-dimension: 768
+        mock-enabled: false
+        max-document-chars: 120000
+        temperature: 0.2
+        max-tokens: 1024
+        connect-timeout-millis: 5000
+        read-timeout-millis: 60000
+      index:
+        chunk-size: 1200
+        chunk-overlap: 200
+        retrieval-top-k: 6
+        max-text-chars: 200000
+      pgvector:
+        enabled: true
+        init-schema: true
+        url: jdbc:postgresql://127.0.0.1:5432/networkdisk_ai
+        username: postgres
+        password: 123456
+        dimension: 768
+        maximum-pool-size: 4
+        minimum-idle: 1

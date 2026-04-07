@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.disk</groupId>
+        <artifactId>networkdisk-business</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.disk</groupId>
+    <artifactId>networkdisk-ai</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>networkdisk-ai</name>
+    <description>networkdisk-ai</description>
+
+    <properties>
+        <application.name>networkdisk-ai</application.name>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <tika.version>2.9.2</tika.version>
+        <commons-io.version>2.15.1</commons-io.version>
+        <pgvector.version>0.1.6</pgvector.version>
+        <postgresql.version>42.7.3</postgresql.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-base</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-limiter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-datasource</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-rpc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-mq</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.disk</groupId>
+            <artifactId>networkdisk-file</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pgvector</groupId>
+            <artifactId>pgvector</artifactId>
+            <version>${pgvector.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>${tika.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers-standard-package</artifactId>
+            <version>${tika.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
