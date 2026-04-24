@@ -9,7 +9,7 @@ dubbo:
   registry:
     address: nacos://127.0.0.1:8848 #首次启动前务必修改成你自己的
     parameters:
-      namespace: f0802a66-04d1-44c3-9111-bfe7e1872afd      # 自己到nacos上创建一个给dubbo用的namespce，然后和这里保持一致，首次启动前务必修改成个人的
+      namespace: xxx      # 自己到nacos上创建一个给dubbo用的namespce，然后和这里保持一致，首次启动前务必修改成个人的
       group: dubbo #首次启动前务必修改为个人的
   application:
     name: ${spring.application.name}

@@ -3,3 +3,9 @@
 */target/
 *.log
 .idea/
+.vscode/
+**/target/
+**/node_modules/
+**/dist/
+*.jar
+*.war

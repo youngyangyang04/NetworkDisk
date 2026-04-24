@@ -1,13 +1,14 @@
 <template>
   <el-drawer
     :model-value="modelValue"
+    :title="currentFileName"
     size="760px"
     direction="rtl"
     :destroy-on-close="false"
     class="ai-file-drawer"
     @update:model-value="emit('update:modelValue', $event)"
   >
-    <template #header>
+    <!--
       <div class="drawer-hero">
         <div class="drawer-hero__content">
           <div class="drawer-hero__eyebrow">Document Intelligence</div>
@@ -24,7 +25,7 @@
           </el-tag>
         </div>
       </div>
-    </template>
+    -->
 
     <el-scrollbar class="drawer-scroll">
       <div class="ai-layout">
@@ -47,11 +48,19 @@
           </div>
           <div class="status-band__actions">
             <el-button plain :loading="capabilityLoading" @click="loadCapabilities(true)">刷新状态</el-button>
-            <el-button type="primary" :disabled="!isSupportedFile" :loading="summaryLoading || tagsLoading" @click="loadInsights">
+            <el-button v-if="isInsightMode" type="primary" :disabled="!isSupportedFile" :loading="summaryLoading || tagsLoading" @click="loadInsights">
               读取 AI 结果
             </el-button>
-            <el-button :disabled="!isSupportedFile" :loading="reindexLoading" @click="reindexDocument">
+            <el-button v-if="isInsightMode" :disabled="!isSupportedFile" :loading="reindexLoading" @click="reindexDocument">
               重建索引
+            </el-button>
+            <el-button
+              v-if="isInsightMode && fileId"
+              type="success"
+              plain
+              @click="openFile"
+            >
+              {{ continueOpenLabel }}
             </el-button>
           </div>
         </section>
@@ -72,7 +81,7 @@
           title="当前文件类型暂未纳入文档 AI 能力范围。建议使用 PDF、Word、Excel、PPT、TXT、CSV 或代码文本文件。"
         />
 
-        <div class="content-grid">
+        <div v-if="isInsightMode" class="content-grid">
           <section class="insight-panel">
             <div class="panel-head">
               <div class="panel-head__title">
@@ -133,7 +142,7 @@
                 show-icon
                 :title="summaryError"
               />
-              <div v-else class="summary-content">{{ summaryText }}</div>
+              <div v-else class="summary-content markdown-content" v-html="renderedSummaryHtml"></div>
             </div>
           </section>
 
@@ -192,7 +201,7 @@
           </section>
         </div>
 
-        <section class="qa-panel">
+        <section v-if="isQaMode" class="qa-panel">
           <div class="panel-head">
             <div class="panel-head__title">
               <el-icon><ChatDotRound /></el-icon>
@@ -253,7 +262,7 @@
                 :title="item.error"
               />
               <template v-else>
-                <div class="qa-card__answer">{{ item.answer }}</div>
+                <div class="qa-card__answer markdown-content" v-html="renderMarkdownToHtml(item.answer)"></div>
                 <div v-if="item.references?.length" class="reference-list">
                   <div class="reference-list__title">引用片段</div>
                   <div v-for="reference in item.references" :key="reference" class="reference-item">
@@ -273,6 +282,7 @@
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ChatDotRound, CollectionTag, Cpu, Document } from '@element-plus/icons-vue'
+import { renderMarkdownToHtml } from '@/utils/markdown'
 import {
   askSingleFileQuestion,
   generateFileTags,
@@ -289,12 +299,17 @@ const props = defineProps({
   file: {
     type: Object,
     default: null
+  },
+  mode: {
+    type: String,
+    default: 'insight'
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'open-file'])
 
 const SUPPORTED_FILE_TYPES = new Set([3, 4, 5, 6, 10, 11, 12])
+const INLINE_PREVIEW_FILE_TYPES = new Set([5, 6, 7, 8, 9, 11, 12])
 
 const FILE_TYPE_LABELS = {
   1: '文件',
@@ -351,11 +366,25 @@ const reindexLoading = ref(false)
 const autoLoadedFileKey = ref('')
 
 const fileId = computed(() => props.file?.id || props.file?.fileId || props.file?.file_id || '')
+const drawerMode = computed(() => (props.mode === 'qa' ? 'qa' : 'insight'))
+const isQaMode = computed(() => drawerMode.value === 'qa')
+const isInsightMode = computed(() => drawerMode.value === 'insight')
 const currentFileKey = computed(() => (fileId.value ? String(fileId.value) : ''))
+const currentDrawerKey = computed(() => `${currentFileKey.value}:${drawerMode.value}`)
 const currentFileName = computed(() => props.file?.filename || '文档智能分析')
 const currentFileSize = computed(() => props.file?.fileSizeDesc || '未知大小')
 const currentFileTypeLabel = computed(() => FILE_TYPE_LABELS[Number(props.file?.fileType)] || '未知类型')
 const isSupportedFile = computed(() => Boolean(fileId.value) && !props.file?.folderFlag && SUPPORTED_FILE_TYPES.has(Number(props.file?.fileType)))
+const renderedSummaryHtml = computed(() => renderMarkdownToHtml(summaryText.value))
+
+const drawerDescription = computed(() => (
+  isQaMode.value
+    ? '这里仅保留单文件问答，你可以直接基于当前文件追问。'
+    : '这里会先展示文件摘要与标签，再决定是否继续查看文件内容。'
+))
+const continueOpenLabel = computed(() => (
+  INLINE_PREVIEW_FILE_TYPES.has(Number(props.file?.fileType)) ? '预览文件' : '查看文件'
+))
 
 watch(
   () => props.modelValue,
@@ -366,7 +395,7 @@ watch(
   }
 )
 
-watch(currentFileKey, () => {
+watch(currentDrawerKey, () => {
   resetDocumentState()
   if (props.modelValue) {
     handleDrawerOpen()
@@ -402,8 +431,8 @@ async function handleDrawerOpen() {
     return
   }
   void loadCapabilities()
-  if (isSupportedFile.value && autoLoadedFileKey.value !== currentFileKey.value) {
-    autoLoadedFileKey.value = currentFileKey.value
+  if (isInsightMode.value && isSupportedFile.value && autoLoadedFileKey.value !== currentDrawerKey.value) {
+    autoLoadedFileKey.value = currentDrawerKey.value
     void loadInsights()
   }
 }
@@ -551,6 +580,14 @@ async function askQuestion() {
     qaLoading.value = false
     qaHistory.value = [...qaHistory.value]
   }
+}
+
+function openFile() {
+  if (!props.file) {
+    return
+  }
+  emit('open-file', props.file)
+  emit('update:modelValue', false)
 }
 
 function formatDateTime(value) {
@@ -753,12 +790,137 @@ function formatDateTime(value) {
   min-height: 180px;
 }
 
-.summary-content,
-.qa-card__answer {
-  white-space: pre-wrap;
+.markdown-content {
   word-break: break-word;
   line-height: 1.8;
   color: #1e293b;
+}
+
+.markdown-content p,
+.markdown-content ul,
+.markdown-content ol,
+.markdown-content blockquote,
+.markdown-content hr,
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6,
+.markdown-content .markdown-code-block {
+  margin: 0 0 14px;
+}
+
+.markdown-content p:last-child,
+.markdown-content ul:last-child,
+.markdown-content ol:last-child,
+.markdown-content blockquote:last-child,
+.markdown-content .markdown-code-block:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.markdown-content h1 {
+  font-size: 24px;
+}
+
+.markdown-content h2 {
+  font-size: 21px;
+}
+
+.markdown-content h3 {
+  font-size: 18px;
+}
+
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  font-size: 16px;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 20px;
+}
+
+.markdown-content li + li {
+  margin-top: 6px;
+}
+
+.markdown-content a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.markdown-content blockquote {
+  padding: 12px 14px;
+  border-left: 4px solid #93c5fd;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.markdown-content code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-size: 0.92em;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+}
+
+.markdown-content .markdown-code-block {
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: #0f172a;
+}
+
+.markdown-content .markdown-code-block__label {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.markdown-content .markdown-code-block pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+}
+
+.markdown-content .markdown-code-block pre code {
+  padding: 0;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre;
+}
+
+.markdown-content hr {
+  border: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.qa-card__answer {
+  white-space: normal;
 }
 
 .tag-cloud {

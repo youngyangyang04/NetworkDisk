@@ -78,7 +78,7 @@ export function transferFiles(data) {
   })
 }
 
-// 文件下载
+// 文件下载.md
 export function downloadFile(params) {
   return fileRequest({
     url: '/file/download',

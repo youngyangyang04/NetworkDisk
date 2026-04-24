@@ -1,7 +1,0 @@
-spring:
-  elasticsearch:
-    enable: true
-    uris: http://127.0.0.1:9200 #如果你没有启动一键mock，这里需要改成你自己的
-easy-es:
-  enable: true
-  print-dsl: true

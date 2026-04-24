@@ -176,7 +176,12 @@
       </template>
     </el-dialog>
 
-    <AiFileDrawer v-model="showAiDrawer" :file="currentAiFile" />
+    <AiFileDrawer
+      v-model="showAiDrawer"
+      :file="currentAiFile"
+      :mode="currentAiMode"
+      @open-file="continueFileAction"
+    />
   </div>
 </template>
 
@@ -217,6 +222,7 @@ const shareForm = ref({
 
 const showAiDrawer = ref(false)
 const currentAiFile = ref(null)
+const currentAiMode = ref('insight')
 
 const shareRules = {
   shareName: [
@@ -317,6 +323,14 @@ function clickFilename(file) {
     openFolder(file)
     return
   }
+  if (supportsAi(file)) {
+    openAiDrawer(file, 'insight')
+    return
+  }
+  continueFileAction(file)
+}
+
+function continueFileAction(file) {
   if (canInlinePreview(file?.fileType)) {
     previewFile(file)
     return
@@ -571,12 +585,13 @@ async function confirmShare() {
   }
 }
 
-function openAiDrawer(file) {
+function openAiDrawer(file, mode = 'qa') {
   if (!supportsAi(file)) {
     ElMessage.warning('当前文件类型暂不支持 AI 解析')
     return
   }
   currentAiFile.value = file
+  currentAiMode.value = mode
   showAiDrawer.value = true
 }
 
